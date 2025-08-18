@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import requests
 import re
 import logging
@@ -10,6 +11,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+CORS(app)
 
 # API endpoints
 ALPHAFOLD_API = "https://alphafold.ebi.ac.uk/api/prediction/{}"
@@ -57,6 +59,19 @@ def search():
     except Exception as e:
         logger.error(f"Search error: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
+
+
+@app.route('/api/structure/<uniprot_id>', methods=['GET'])
+def get_structure(uniprot_id):
+    """API endpoint to fetch structure details by UniProt ID"""
+    if not is_uniprot_id(uniprot_id):
+        return jsonify({"error": "Invalid UniProt ID"}), 400
+
+    result = fetch_by_uniprot_id(uniprot_id)
+    if result:
+        return jsonify(result)
+
+    return jsonify({"error": "Structure not found"}), 404
 
 def is_uniprot_id(query):
     """Check if query matches UniProt ID pattern"""
