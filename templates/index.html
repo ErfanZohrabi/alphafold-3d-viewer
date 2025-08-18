@@ -1,912 +1,116 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlphaFold 3D Protein Viewer</title>
-    <link href="https://cdn.jsdelivr.net/npm/molstar@4.18.0/build/viewer/molstar.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;600;700&family=Google+Sans+Text:wght@400;500&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-    <style>
-        :root {
-            --primary-blue: #1a73e8;
-            --primary-blue-hover: #1557b0;
-            --secondary-blue: #e8f0fe;
-            --text-primary: #202124;
-            --text-secondary: #5f6368;
-            --text-disabled: #9aa0a6;
-            --surface: #ffffff;
-            --surface-variant: #f8f9fa;
-            --surface-container: #f1f3f4;
-            --outline: #dadce0;
-            --outline-variant: #e8eaed;
-            --success: #137333;
-            --success-container: #e6f4ea;
-            --error: #d93025;
-            --error-container: #fce8e6;
-            --warning: #f9ab00;
-            --warning-container: #fef7e0;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Google Sans Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--surface);
-            color: var(--text-primary);
-            line-height: 1.5;
-        }
-
-        /* Header */
-        .header {
-            background: var(--surface);
-            border-bottom: 1px solid var(--outline-variant);
-            padding: 16px 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            color: var(--text-primary);
-        }
-
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #4285f4, #34a853);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 18px;
-        }
-
-        .logo-text {
-            font-family: 'Google Sans', sans-serif;
-            font-size: 22px;
-            font-weight: 400;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary-blue);
-        }
-
-        /* Hero Section */
-        .hero {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 64px 24px 48px;
-            text-align: center;
-        }
-
-        .hero-title {
-            font-family: 'Google Sans', sans-serif;
-            font-size: 48px;
-            font-weight: 300;
-            color: var(--text-primary);
-            margin-bottom: 16px;
-            line-height: 1.2;
-        }
-
-        .hero-subtitle {
-            font-size: 18px;
-            color: var(--text-secondary);
-            margin-bottom: 48px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* Search Section */
-        .search-section {
-            max-width: 800px;
-            margin: 0 auto 64px;
-            padding: 0 24px;
-        }
-
-        .search-container {
-            background: var(--surface);
-            border: 1px solid var(--outline);
-            border-radius: 24px;
-            padding: 8px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 1px 6px rgba(32, 33, 36, 0.1);
-            transition: box-shadow 0.2s, border-color 0.2s;
-        }
-
-        .search-container:focus-within {
-            border-color: var(--primary-blue);
-            box-shadow: 0 2px 8px rgba(26, 115, 232, 0.15);
-        }
-
-        .search-input {
-            flex: 1;
-            border: none;
-            outline: none;
-            font-size: 16px;
-            padding: 12px 16px;
-            background: transparent;
-            color: var(--text-primary);
-        }
-
-        .search-input::placeholder {
-            color: var(--text-disabled);
-        }
-
-        .search-button {
-            background: var(--primary-blue);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 12px 24px;
-            font-weight: 500;
-            font-size: 14px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background-color 0.2s;
-        }
-
-        .search-button:hover {
-            background: var(--primary-blue-hover);
-        }
-
-        .search-button:disabled {
-            background: var(--text-disabled);
-            cursor: not-allowed;
-        }
-
-        /* Examples */
-        .examples {
-            max-width: 1200px;
-            margin: 0 auto 64px;
-            padding: 0 24px;
-        }
-
-        .examples-title {
-            font-family: 'Google Sans', sans-serif;
-            font-size: 20px;
-            font-weight: 500;
-            margin-bottom: 16px;
-            text-align: center;
-            color: var(--text-primary);
-        }
-
-        .example-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-        }
-
-        .example-chip {
-            background: var(--surface-variant);
-            border: 1px solid var(--outline);
-            border-radius: 16px;
-            padding: 8px 16px;
-            font-size: 14px;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .example-chip:hover {
-            background: var(--secondary-blue);
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
-        }
-
-        /* Status Messages */
-        .status-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        .status {
-            display: none;
-            align-items: center;
-            gap: 12px;
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            font-weight: 500;
-        }
-
-        .status.loading {
-            display: flex;
-            background: var(--warning-container);
-            color: var(--warning);
-            border: 1px solid rgba(249, 171, 0, 0.2);
-        }
-
-        .status.success {
-            display: flex;
-            background: var(--success-container);
-            color: var(--success);
-            border: 1px solid rgba(19, 115, 51, 0.2);
-        }
-
-        .status.error {
-            display: flex;
-            background: var(--error-container);
-            color: var(--error);
-            border: 1px solid rgba(217, 48, 37, 0.2);
-        }
-
-        .loading-spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid transparent;
-            border-top: 2px solid currentColor;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Protein Info */
-        .protein-info {
-            display: none;
-            max-width: 1200px;
-            margin: 0 auto 32px;
-            padding: 0 24px;
-        }
-
-        .info-card {
-            background: var(--surface);
-            border: 1px solid var(--outline-variant);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(32, 33, 36, 0.1);
-        }
-
-        .info-header {
-            background: var(--surface-variant);
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--outline-variant);
-        }
-
-        .info-title {
-            font-family: 'Google Sans', sans-serif;
-            font-size: 18px;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .info-subtitle {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .info-grid {
-            padding: 24px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .info-label {
-            color: var(--text-secondary);
-            font-size: 12px;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .info-value {
-            color: var(--text-primary);
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        /* Viewer */
-        .viewer-section {
-            display: none;
-            max-width: 1200px;
-            margin: 0 auto 64px;
-            padding: 0 24px;
-        }
-
-        .viewer-card {
-            background: var(--surface);
-            border: 1px solid var(--outline-variant);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(32, 33, 36, 0.1);
-        }
-
-        .viewer-header {
-            background: var(--surface-variant);
-            padding: 16px 24px;
-            border-bottom: 1px solid var(--outline-variant);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .viewer-title {
-            font-family: 'Google Sans', sans-serif;
-            font-size: 16px;
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .viewer-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .action-button {
-            background: transparent;
-            border: 1px solid var(--outline);
-            border-radius: 8px;
-            padding: 8px 12px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 12px;
-            transition: all 0.2s;
-        }
-
-        .action-button:hover {
-            background: var(--surface-variant);
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
-        }
-
-        #viewer {
-            width: 100%;
-            height: 600px;
-            border: none;
-        }
-
-        /* Content Sections */
-        .content-section {
-            max-width: 1200px;
-            margin: 0 auto 64px;
-            padding: 0 24px;
-        }
-
-        .section-title {
-            font-family: 'Google Sans', sans-serif;
-            font-size: 24px;
-            font-weight: 400;
-            margin-bottom: 16px;
-            color: var(--text-primary);
-        }
-
-        .section-description {
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-            line-height: 1.6;
-        }
-
-        .feature-list {
-            list-style: none;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .feature-icon {
-            background: var(--secondary-blue);
-            color: var(--primary-blue);
-            border-radius: 8px;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .feature-content h3 {
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 4px;
-            color: var(--text-primary);
-        }
-
-        .feature-content p {
-            color: var(--text-secondary);
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        /* Footer */
-        .footer {
-            background: var(--surface-variant);
-            border-top: 1px solid var(--outline-variant);
-            padding: 48px 0;
-            margin-top: 64px;
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-            text-align: center;
-        }
-
-        .footer-text {
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
-            color: var(--primary-blue);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .footer-links a:hover {
-            text-decoration: underline;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header-container {
-                padding: 0 16px;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            .hero {
-                padding: 48px 16px 32px;
-            }
-
-            .hero-title {
-                font-size: 36px;
-            }
-
-            .search-section,
-            .examples,
-            .status-container,
-            .protein-info,
-            .viewer-section,
-            .content-section {
-                padding: 0 16px;
-            }
-
-            .search-container {
-                flex-direction: column;
-                align-items: stretch;
-                padding: 16px;
-                gap: 16px;
-            }
-
-            .search-button {
-                justify-content: center;
-                padding: 16px 24px;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-                padding: 16px;
-            }
-
-            .viewer-header {
-                padding: 12px 16px;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-
-            .viewer-actions {
-                align-self: stretch;
-                justify-content: space-between;
-            }
-
-            #viewer {
-                height: 400px;
-            }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <title>AlphaFold 3D Protein Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Mol* (no module build is easiest to use) -->
+  <script src="https://cdn.jsdelivr.net/npm/molstar@latest/build/viewer/molstar.js"></script>
+  <style>
+    :root { color-scheme: light dark; }
+    body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    header { padding: 16px 24px; border-bottom: 1px solid #ddd4; display: flex; align-items: center; gap: 16px; }
+    h1 { font-size: 20px; margin: 0; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 16px 24px; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    input[type="text"] { flex: 1; min-width: 240px; padding: 10px 12px; border-radius: 10px; border: 1px solid #ccc; }
+    button { padding: 10px 14px; border-radius: 10px; border: 1px solid #3333; cursor: pointer; }
+    #viewer { width: 100%; height: 560px; border-radius: 12px; overflow: hidden; border: 1px solid #ccc; margin-top: 16px; }
+    .muted { color: #666; }
+    .examples a { margin-right: 10px; cursor: pointer; text-decoration: underline; }
+    .pill { display:inline-block; padding:4px 8px; border:1px solid #8884; border-radius:999px; font-size:12px; margin-right:8px;}
+  </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-container">
-            <a href="#" class="logo">
-                <div class="logo-icon">
-                    <span class="material-icons-outlined">biotech</span>
-                </div>
-                <span class="logo-text">AlphaFold Viewer</span>
-            </a>
-            <nav>
-                <ul class="nav-links">
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#examples">Examples</a></li>
-                    <li><a href="#help">Help</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+  <header>
+    <h1>AlphaFold 3D Protein Viewer</h1>
+    <span class="pill">Mol*</span>
+    <span class="pill">Flask</span>
+  </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <h1 class="hero-title">Explore protein structures</h1>
-        <p class="hero-subtitle">
-            Visualize 3D protein structures from the AlphaFold database with our interactive molecular viewer
-        </p>
+  <main class="wrap">
+    <section>
+      <h2>Explore protein structures</h2>
+      <p class="muted">Search by <strong>UniProt ID</strong> (e.g. <code>P05067</code>) or protein name (e.g. “insulin”).</p>
+      <div class="row">
+        <input id="q" type="text" placeholder="e.g. P05067 or insulin" />
+        <button id="go">Search</button>
+        <button id="reset" title="Clear viewer">Reset</button>
+      </div>
+      <p class="examples muted">Try:
+        <a data-example="P05067">P05067</a>
+        <a data-example="TP53">TP53</a>
+        <a data-example="insulin">insulin</a>
+        <a data-example="hemoglobin">hemoglobin</a>
+        <a data-example="P38398">P38398</a>
+      </p>
+      <div id="status" class="muted"></div>
+      <div id="viewer"></div>
+      <p class="muted" style="margin-top:8px">Powered by <a href="https://alphafold.ebi.ac.uk" target="_blank" rel="noreferrer">AlphaFold DB</a> and <a href="https://molstar.org" target="_blank" rel="noreferrer">Mol*</a>.</p>
     </section>
+  </main>
 
-    <!-- Search Section -->
-    <section class="search-section">
-        <div class="search-container">
-            <input 
-                type="text" 
-                id="query" 
-                class="search-input" 
-                placeholder="Enter UniProt ID, protein name, or amino acid sequence"
-            >
-            <button id="searchBtn" class="search-button" onclick="search()">
-                <span class="material-icons-outlined">search</span>
-                Search
-            </button>
-        </div>
-    </section>
+  <script>
+    // Viewer boot
+    let viewer = null;
+    function makeViewer() {
+      if (viewer) return viewer;
+      viewer = new molstar.Viewer('viewer', {
+        layoutIsExpanded: false,
+        layoutShowControls: true,
+        layoutShowRemoteState: false,
+        viewportShowExpand: true,
+        collapseLeftPanel: true,
+      });
+      return viewer;
+    }
 
-    <!-- Examples -->
-    <section id="examples" class="examples">
-        <h2 class="examples-title">Try these examples</h2>
-        <div class="example-chips">
-            <div class="example-chip" onclick="setQuery('P05067')">P05067 (Amyloid beta)</div>
-            <div class="example-chip" onclick="setQuery('TP53')">TP53 (Tumor suppressor)</div>
-            <div class="example-chip" onclick="setQuery('INS')">Insulin</div>
-            <div class="example-chip" onclick="setQuery('HBB')">Hemoglobin</div>
-            <div class="example-chip" onclick="setQuery('P38398')">P38398 (BRCA1)</div>
-            <div class="example-chip" onclick="setQuery('P00533')">P00533 (EGFR)</div>
-            <div class="example-chip" onclick="setQuery('P13569')">P13569 (CFTR)</div>
-            <div class="example-chip" onclick="setQuery('P12883')">P12883 (Myosin-7)</div>
-        </div>
-    </section>
+    async function loadAccession(acc, pdbUrl) {
+      const v = makeViewer();
+      document.getElementById('status').textContent = `Loading ${acc}…`;
+      try {
+        await v.clear();
+        // load via our proxy to avoid CORS
+        const proxied = `/proxy?url=${encodeURIComponent(pdbUrl)}`;
+        await v.loadStructureFromUrl(proxied, 'pdb');
+        document.getElementById('status').textContent = `Loaded ${acc}`;
+      } catch (e) {
+        document.getElementById('status').textContent = `Failed to load ${acc}: ${e}`;
+      }
+    }
 
-    <!-- Status -->
-    <div class="status-container">
-        <div id="status" class="status">
-            <span class="material-icons-outlined">info</span>
-            <span id="statusText">Enter a search query to get started</span>
-        </div>
-    </div>
+    async function doSearch(query) {
+      document.getElementById('status').textContent = 'Resolving…';
+      const res = await fetch('/search', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ query })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        document.getElementById('status').textContent = data.error || 'Search failed';
+        return;
+      }
+      const { accession, pdb_url } = data;
+      await loadAccession(accession, pdb_url);
+    }
 
-    <!-- Protein Info -->
-    <section id="proteinInfo" class="protein-info">
-        <div class="info-card">
-            <div class="info-header">
-                <div class="info-title" id="proteinTitle">Protein Information</div>
-                <div class="info-subtitle">Structure prediction details</div>
-            </div>
-            <div id="infoGrid" class="info-grid"></div>
-        </div>
-    </section>
-
-    <!-- Viewer -->
-    <section id="viewerSection" class="viewer-section">
-        <div class="viewer-card">
-            <div class="viewer-header">
-                <div class="viewer-title" id="viewerTitle">3D Structure</div>
-                <div class="viewer-actions">
-                    <button class="action-button" onclick="resetView()">
-                        <span class="material-icons-outlined">refresh</span>
-                        Reset
-                    </button>
-                    <button class="action-button" onclick="toggleSpin()">
-                        <span class="material-icons-outlined">3d_rotation</span>
-                        Rotate
-                    </button>
-                    <button class="action-button" onclick="downloadStructure()">
-                        <span class="material-icons-outlined">download</span>
-                        Download
-                    </button>
-                    <button class="action-button" onclick="toggleFullscreen()">
-                        <span class="material-icons-outlined">fullscreen</span>
-                        Fullscreen
-                    </button>
-                </div>
-            </div>
-            <div id="viewer"></div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="content-section">
-        <h2 class="section-title">About this tool</h2>
-        <p class="section-description">
-            This interactive viewer provides access to protein structure predictions from the AlphaFold database. 
-            Search by UniProt ID, protein name, or amino acid sequence to explore detailed 3D molecular structures.
-        </p>
-        <ul class="feature-list">
-            <li class="feature-item">
-                <div class="feature-icon">
-                    <span class="material-icons-outlined">search</span>
-                </div>
-                <div class="feature-content">
-                    <h3>Multiple search methods</h3>
-                    <p>Search using UniProt IDs, common protein names, or raw amino acid sequences</p>
-                </div>
-            </li>
-            <li class="feature-item">
-                <div class="feature-icon">
-                    <span class="material-icons-outlined">3d_rotation</span>
-                </div>
-                <div class="feature-content">
-                    <h3>Interactive visualization</h3>
-                    <p>Rotate, zoom, and explore molecular structures with advanced WebGL rendering</p>
-                </div>
-            </li>
-            <li class="feature-item">
-                <div class="feature-icon">
-                    <span class="material-icons-outlined">analytics</span>
-                </div>
-                <div class="feature-content">
-                    <h3>Detailed information</h3>
-                    <p>View protein metadata, confidence scores, and structural annotations</p>
-                </div>
-            </li>
-            <li class="feature-item">
-                <div class="feature-icon">
-                    <span class="material-icons-outlined">download</span>
-                </div>
-                <div class="feature-content">
-                    <h3>Export capabilities</h3>
-                    <p>Download structure files in standard formats for further analysis</p>
-                </div>
-            </li>
-        </ul>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <p class="footer-text">
-                Powered by AlphaFold Database and Mol* molecular viewer
-            </p>
-            <div class="footer-links">
-                <a href="https://alphafold.ebi.ac.uk" target="_blank">AlphaFold Database</a>
-                <a href="https://molstar.org" target="_blank">Mol* Viewer</a>
-                <a href="https://deepmind.google" target="_blank">DeepMind</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/molstar@4.18.0/build/viewer/molstar.min.js"></script>
-    <script>
-        let viewer;
-        let isSpinning = false;
-        let currentModelUrl = '';
-
-        function setQuery(text) {
-            document.getElementById('query').value = text;
-            search();
-        }
-
-        function showStatus(message, type, icon = 'info') {
-            const status = document.getElementById('status');
-            const statusText = document.getElementById('statusText');
-            
-            status.className = `status ${type}`;
-            statusText.textContent = message;
-            
-            const iconElement = status.querySelector('.material-icons-outlined');
-            iconElement.textContent = type === 'loading' ? '' : icon;
-            
-            if (type === 'loading') {
-                iconElement.className = 'loading-spinner';
-            } else {
-                iconElement.className = 'material-icons-outlined';
-            }
-        }
-
-        function showProteinInfo(data) {
-            const info = document.getElementById('proteinInfo');
-            const grid = document.getElementById('infoGrid');
-            const title = document.getElementById('proteinTitle');
-            
-            title.textContent = data.protein_name || data.id || 'Protein Information';
-            
-            const fields = [
-                { label: 'UniProt ID', value: data.id || 'N/A' },
-                { label: 'Protein Name', value: data.protein_name || 'N/A' },
-                { label: 'Gene Name', value: data.gene_name || 'N/A' },
-                { label: 'Organism', value: data.organism || 'N/A' },
-                { label: 'Length', value: data.length ? `${data.length} amino acids` : 'N/A' },
-                { label: 'Model Created', value: data.model_created ? new Date(data.model_created).toLocaleDateString() : 'N/A' },
-                { label: 'Confidence Score', value: data.confidence_score ? `${Math.round(data.confidence_score)}%` : 'N/A' },
-                { label: 'Model Version', value: data.model_version || 'N/A' }
-            ];
-            
-            grid.innerHTML = fields.map(field => `
-                <div class="info-item">
-                    <div class="info-label">${field.label}</div>
-                    <div class="info-value">${field.value}</div>
-                </div>
-            `).join('');
-            
-            info.style.display = 'block';
-        }
-
-        async function search() {
-            const query = document.getElementById('query').value.trim();
-            const searchBtn = document.getElementById('searchBtn');
-            
-            if (!query) {
-                showStatus('Please enter a search query', 'error', 'error');
-                return;
-            }
-            
-            searchBtn.disabled = true;
-            searchBtn.innerHTML = '<div class="loading-spinner"></div>Searching...';
-            showStatus('Searching AlphaFold database...', 'loading');
-            
-            try {
-                const response = await fetch('/search', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok && data.model_url) {
-                    showStatus('Structure found! Loading 3D model...', 'success', 'check_circle');
-                    showProteinInfo(data);
-                    await loadStructure(data.model_url, data.protein_name || data.id);
-                } else {
-                    showStatus(data.error || 'Structure not found', 'error', 'error');
-                    document.getElementById('proteinInfo').style.display = 'none';
-                    document.getElementById('viewerSection').style.display = 'none';
-                }
-            } catch (error) {
-                console.error('Search error:', error);
-                showStatus('Network error. Please try again.', 'error', 'error');
-            } finally {
-                searchBtn.disabled = false;
-                searchBtn.innerHTML = '<span class="material-icons-outlined">search</span>Search';
-            }
-        }
-
-        async function loadStructure(url, title) {
-            try {
-                const viewerSection = document.getElementById('viewerSection');
-                const viewerTitle = document.getElementById('viewerTitle');
-                
-                viewerSection.style.display = 'block';
-                viewerTitle.textContent = `3D Structure: ${title}`;
-                currentModelUrl = url;
-                
-                if (!viewer) {
-                    viewer = await molstar.Viewer.create('viewer', {
-                        layoutShowControls: false,
-                        layoutShowRemoteState: false,
-                        layoutShowSequence: true,
-                        layoutShowLog: false,
-                        layoutShowLeftPanel: true,
-                        viewportShowExpand: true,
-                        viewportShowSelectionMode: false,
-                        viewportShowAnimation: false
-                    });
-                } else {
-                    await viewer.clear();
-                }
-                
-                await viewer.loadStructureFromUrl(url, 'mmcif', false);
-                showStatus('3D structure loaded successfully!', 'success', 'check_circle');
-                
-                // Smooth scroll to viewer
-                viewerSection.scrollIntoView({ behavior: 'smooth' });
-            } catch (error) {
-                console.error('Structure loading error:', error);
-                showStatus('Failed to load 3D structure', 'error', 'error');
-            }
-        }
-
-        function downloadStructure() {
-            if (currentModelUrl) {
-                window.open(currentModelUrl, '_blank');
-            }
-        }
-
-        function resetView() {
-            if (viewer) {
-                viewer.resetCamera();
-            }
-        }
-
-        function toggleSpin() {
-            if (viewer) {
-                if (isSpinning) {
-                    viewer.stopSpin();
-                    isSpinning = false;
-                } else {
-                    viewer.spin();
-                    isSpinning = true;
-                }
-            }
-        }
-
-        function toggleFullscreen() {
-            const container = document.getElementById('viewer');
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-            } else {
-                container.requestFullscreen();
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('query').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    search();
-                }
-            });
-            showStatus('Enter a search query to get started', 'loading');
-        });
-    </script>
+    document.getElementById('go').addEventListener('click', () => {
+      const q = document.getElementById('q').value.trim();
+      if (q) doSearch(q);
+    });
+    document.getElementById('reset').addEventListener('click', async () => {
+      if (!viewer) return;
+      await viewer.clear();
+      document.getElementById('status').textContent = 'Viewer cleared';
+    });
+    document.querySelectorAll('[data-example]').forEach(a =>
+      a.addEventListener('click', () => {
+        document.getElementById('q').value = a.dataset.example;
+        doSearch(a.dataset.example);
+      })
+    );
+  </script>
 </body>
 </html>
+
