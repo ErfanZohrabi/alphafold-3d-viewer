@@ -57,7 +57,7 @@ A modern web application for exploring and visualizing protein structures from t
 
 Try these sample searches to get started:
 
-- **UniProt IDs**: `P05067` (Amyloid beta), `P04637` (p53), `P01308` (Insulin)
+- **UniProt IDs**: `P05067` (Amyloid beta), `P04637` (p53), `P01308` (Insulin), `P38398` (BRCA1), `P00533` (EGFR), `P13569` (CFTR), `P12883` (Myosin-7)
 - **Protein Names**: `insulin`, `hemoglobin`, `amyloid`, `collagen`
 - **Sequences**: Enter any valid amino acid sequence (minimum 10 residues)
 
