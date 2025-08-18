@@ -14,6 +14,7 @@ A modern web application for exploring and visualizing protein structures from t
 - **📊 Detailed Protein Information**: View organism, gene names, confidence scores, and more
 - **📱 Responsive Design**: Works seamlessly on desktop and mobile devices
 - **⚡ Real-time Data**: Fetches latest structures directly from AlphaFold database
+- **💾 Easy Downloads**: Save predicted structures in PDB format with a single click
 - **🚀 Easy Deployment**: Ready for deployment on Render, Railway, Heroku, or Vercel
 
 ## 🚀 Quick Start
@@ -97,6 +98,9 @@ alphafold-3d-viewer/
 |--------|----------|-------------|
 | GET    | `/`      | Main application page |
 | POST   | `/search`| Search for protein structures |
+| GET    | `/api/structure/<UniProt_ID>` | Fetch structure metadata by UniProt ID |
+
+All API endpoints support cross-origin requests for easy integration.
 
 ### Search API Example
 
