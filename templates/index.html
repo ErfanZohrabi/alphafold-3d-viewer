@@ -4,18 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlphaFold 3D Protein Viewer</title>
-    <!-- Import Mol* styles for the embedded viewer -->
     <link href="https://cdn.jsdelivr.net/npm/molstar@4.18.0/build/viewer/molstar.min.css" rel="stylesheet">
-    <!--
-      This page restructures the original index.html template from the
-      `alphafold-3d-viewer` project to provide a more polished and
-      information‑rich experience.  The navigation bar, hero section,
-      descriptive sections (About, Examples, FAQ) and footer have been
-      added to make the application easier to understand and use.  The
-      existing search functionality and Mol* integration are preserved.
-    -->
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;600;700&family=Google+Sans+Text:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <style>
-        /* Global styles */
+        :root {
+            --primary-blue: #1a73e8;
+            --primary-blue-hover: #1557b0;
+            --secondary-blue: #e8f0fe;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --text-disabled: #9aa0a6;
+            --surface: #ffffff;
+            --surface-variant: #f8f9fa;
+            --surface-container: #f1f3f4;
+            --outline: #dadce0;
+            --outline-variant: #e8eaed;
+            --success: #137333;
+            --success-container: #e6f4ea;
+            --error: #d93025;
+            --error-container: #fce8e6;
+            --warning: #f9ab00;
+            --warning-container: #fef7e0;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -23,241 +35,371 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
+            font-family: 'Google Sans Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--surface);
+            color: var(--text-primary);
+            line-height: 1.5;
         }
 
-        a {
-            color: #3498db;
-            text-decoration: none;
-        }
-
-        /* Navigation bar */
-        .navbar {
-            background: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        /* Header */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--outline-variant);
+            padding: 16px 0;
             position: sticky;
             top: 0;
-            z-index: 1000;
-            width: 100%;
+            z-index: 100;
         }
 
-        .nav-container {
+        .header-container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 0 24px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 15px 20px;
+            justify-content: space-between;
         }
 
-        .brand {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #2c3e50;
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 400;
         }
 
         .nav-links {
-            list-style: none;
             display: flex;
-            gap: 20px;
+            gap: 32px;
+            list-style: none;
         }
 
-        .nav-links li a {
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
             font-weight: 500;
-            padding: 5px 0;
-            transition: color 0.3s ease;
+            transition: color 0.2s;
         }
 
-        .nav-links li a:hover {
-            color: #764ba2;
+        .nav-links a:hover {
+            color: var(--primary-blue);
         }
 
-        /* Hero section */
+        /* Hero Section */
         .hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 64px 24px 48px;
             text-align: center;
-            padding: 80px 20px;
         }
 
-        .hero h1 {
-            font-size: 2.8rem;
-            margin-bottom: 20px;
+        .hero-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 48px;
             font-weight: 300;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            line-height: 1.2;
         }
 
-        .hero p {
-            font-size: 1.2rem;
-            margin-bottom: 40px;
-            opacity: 0.9;
+        .hero-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Search Section */
+        .search-section {
+            max-width: 800px;
+            margin: 0 auto 64px;
+            padding: 0 24px;
         }
 
         .search-container {
+            background: var(--surface);
+            border: 1px solid var(--outline);
+            border-radius: 24px;
+            padding: 8px;
             display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 1px 6px rgba(32, 33, 36, 0.1);
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .search-container:focus-within {
+            border-color: var(--primary-blue);
+            box-shadow: 0 2px 8px rgba(26, 115, 232, 0.15);
         }
 
         .search-input {
             flex: 1;
-            min-width: 260px;
-            padding: 15px;
-            font-size: 16px;
-            border: 2px solid #fff;
-            border-radius: 10px;
+            border: none;
             outline: none;
-            color: #333;
+            font-size: 16px;
+            padding: 12px 16px;
+            background: transparent;
+            color: var(--text-primary);
         }
 
         .search-input::placeholder {
-            color: rgba(0, 0, 0, 0.5);
+            color: var(--text-disabled);
         }
 
-        .search-btn {
-            padding: 15px 30px;
-            font-size: 16px;
-            background: #3498db;
+        .search-button {
+            background: var(--primary-blue);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 20px;
+            padding: 12px 24px;
+            font-weight: 500;
+            font-size: 14px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
         }
 
-        .search-btn:hover {
-            background: #2980b9;
+        .search-button:hover {
+            background: var(--primary-blue-hover);
         }
 
-        .search-btn:disabled {
-            opacity: 0.6;
+        .search-button:disabled {
+            background: var(--text-disabled);
             cursor: not-allowed;
         }
 
-        /* Sections */
-        section {
-            padding: 60px 20px;
+        /* Examples */
+        .examples {
             max-width: 1200px;
-            margin: 0 auto;
+            margin: 0 auto 64px;
+            padding: 0 24px;
         }
 
-        section h2 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #2c3e50;
+        .examples-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 20px;
             font-weight: 500;
+            margin-bottom: 16px;
+            text-align: center;
+            color: var(--text-primary);
         }
 
-        .about p {
-            max-width: 800px;
-            margin-bottom: 20px;
-        }
-
-        .about ul {
-            list-style-type: disc;
-            margin-left: 20px;
-            max-width: 800px;
-        }
-
-        .examples .example-tags {
+        .example-chips {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
+            justify-content: center;
         }
 
-        .example-tag {
-            background: #3498db;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
+        .example-chip {
+            background: var(--surface-variant);
+            border: 1px solid var(--outline);
+            border-radius: 16px;
+            padding: 8px 16px;
             font-size: 14px;
+            color: var(--text-primary);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s;
         }
 
-        .example-tag:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
+        .example-chip:hover {
+            background: var(--secondary-blue);
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
         }
 
-        /* Status message */
+        /* Status Messages */
+        .status-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
         .status {
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-weight: 500;
             display: none;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            font-weight: 500;
         }
 
         .status.loading {
-            background: #e3f2fd;
-            color: #1976d2;
-            display: block;
+            display: flex;
+            background: var(--warning-container);
+            color: var(--warning);
+            border: 1px solid rgba(249, 171, 0, 0.2);
         }
 
         .status.success {
-            background: #e8f5e8;
-            color: #2e7d32;
-            display: block;
+            display: flex;
+            background: var(--success-container);
+            color: var(--success);
+            border: 1px solid rgba(19, 115, 51, 0.2);
         }
 
         .status.error {
-            background: #ffebee;
-            color: #c62828;
-            display: block;
+            display: flex;
+            background: var(--error-container);
+            color: var(--error);
+            border: 1px solid rgba(217, 48, 37, 0.2);
         }
 
-        /* Protein information */
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Protein Info */
         .protein-info {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 40px;
             display: none;
+            max-width: 1200px;
+            margin: 0 auto 32px;
+            padding: 0 24px;
+        }
+
+        .info-card {
+            background: var(--surface);
+            border: 1px solid var(--outline-variant);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(32, 33, 36, 0.1);
+        }
+
+        .info-header {
+            background: var(--surface-variant);
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--outline-variant);
+        }
+
+        .info-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .info-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
         }
 
         .info-grid {
+            padding: 24px;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
+            gap: 20px;
         }
 
         .info-item {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #3498db;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
         .info-label {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 5px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .info-value {
-            color: #555;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
         }
 
-        /* 3D Viewer */
-        .viewer-container {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            margin-bottom: 40px;
+        /* Viewer */
+        .viewer-section {
             display: none;
+            max-width: 1200px;
+            margin: 0 auto 64px;
+            padding: 0 24px;
+        }
+
+        .viewer-card {
+            background: var(--surface);
+            border: 1px solid var(--outline-variant);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(32, 33, 36, 0.1);
         }
 
         .viewer-header {
-            background: #34495e;
-            color: white;
-            padding: 15px 20px;
-            font-weight: 600;
+            background: var(--surface-variant);
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--outline-variant);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .viewer-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .viewer-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-button {
+            background: transparent;
+            border: 1px solid var(--outline);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .action-button:hover {
+            background: var(--surface-variant);
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
         }
 
         #viewer {
@@ -266,195 +408,331 @@
             border: none;
         }
 
-        .controls {
-            background: #ecf0f1;
-            padding: 15px;
+        /* Content Sections */
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto 64px;
+            padding: 0 24px;
+        }
+
+        .section-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .section-description {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .feature-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-item {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .feature-icon {
+            background: var(--secondary-blue);
+            color: var(--primary-blue);
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
         }
 
-        .control-btn {
-            padding: 8px 16px;
-            background: #95a5a6;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        .feature-content h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .feature-content p {
+            color: var(--text-secondary);
             font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .control-btn:hover {
-            background: #7f8c8d;
-        }
-
-        /* FAQ */
-        .faq details {
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px 15px;
-            background: #fff;
-        }
-
-        .faq summary {
-            cursor: pointer;
-            font-weight: 600;
-            position: relative;
-        }
-
-        .faq summary::marker {
-            color: #3498db;
-        }
-
-        .faq p {
-            margin-top: 10px;
+            line-height: 1.5;
         }
 
         /* Footer */
         .footer {
-            background: #2c3e50;
-            color: white;
+            background: var(--surface-variant);
+            border-top: 1px solid var(--outline-variant);
+            padding: 48px 0;
+            margin-top: 64px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
             text-align: center;
-            padding: 30px 20px;
-            font-size: 0.9rem;
         }
 
-        .footer a {
-            color: #85c1e9;
+        .footer-text {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
         }
 
-        /* Responsive design */
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2rem;
+            .header-container {
+                padding: 0 16px;
             }
+
             .nav-links {
                 display: none;
+            }
+
+            .hero {
+                padding: 48px 16px 32px;
+            }
+
+            .hero-title {
+                font-size: 36px;
+            }
+
+            .search-section,
+            .examples,
+            .status-container,
+            .protein-info,
+            .viewer-section,
+            .content-section {
+                padding: 0 16px;
+            }
+
+            .search-container {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 16px;
+                gap: 16px;
+            }
+
+            .search-button {
+                justify-content: center;
+                padding: 16px 24px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                padding: 16px;
+            }
+
+            .viewer-header {
+                padding: 12px 16px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .viewer-actions {
+                align-self: stretch;
+                justify-content: space-between;
+            }
+
+            #viewer {
+                height: 400px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation bar -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="brand">AlphaFold 3D Viewer</div>
-            <ul class="nav-links">
-                <li><a href="#hero">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#examples">Examples</a></li>
-                <li><a href="#faq">FAQ</a></li>
-            </ul>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="#" class="logo">
+                <div class="logo-icon">
+                    <span class="material-icons-outlined">biotech</span>
+                </div>
+                <span class="logo-text">AlphaFold Viewer</span>
+            </a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#examples">Examples</a></li>
+                    <li><a href="#help">Help</a></li>
+                </ul>
+            </nav>
         </div>
-    </nav>
+    </header>
 
-    <!-- Hero section with search bar -->
-    <section id="hero" class="hero">
-        <h1>Explore Biomolecular Structures</h1>
-        <p>Search proteins and visualise their predicted 3D structures using the AlphaFold database.</p>
-        <div class="search-container">
-            <input type="text" id="query" class="search-input" placeholder="Enter UniProt ID, protein name, or sequence">
-            <button id="searchBtn" class="search-btn" onclick="search()">🔍 Search Structure</button>
-        </div>
-    </section>
-
-    <!-- About section -->
-    <section id="about" class="about">
-        <h2>About This Viewer</h2>
-        <p>
-            This web‑app provides a simple interface to the <strong>AlphaFold</strong> database.  It allows you to
-            search for proteins by <em>UniProt ID</em>, common name or raw amino acid sequence, and then
-            interactively view their predicted 3D structures.  Results are presented using the
-            <a href="https://molstar.org/" target="_blank">Mol*</a> viewer, an advanced WebGL visualiser for
-            macromolecules.  Please note that these models are predictions and should be used for
-            <strong>research and educational purposes only</strong>.
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1 class="hero-title">Explore protein structures</h1>
+        <p class="hero-subtitle">
+            Visualize 3D protein structures from the AlphaFold database with our interactive molecular viewer
         </p>
-        <ul>
-            <li>Enter a valid UniProt identifier (e.g., <code>P05067</code>), protein name, or a peptide sequence of
-                at least 10 residues.</li>
-            <li>The app queries the AlphaFold API and returns the best available model along with
-                metadata about the protein.</li>
-            <li>Interact with the 3D structure: rotate, zoom, reset the view, spin the model or
-                download the underlying PDB file.</li>
-        </ul>
     </section>
 
-    <!-- Examples section -->
+    <!-- Search Section -->
+    <section class="search-section">
+        <div class="search-container">
+            <input 
+                type="text" 
+                id="query" 
+                class="search-input" 
+                placeholder="Enter UniProt ID, protein name, or amino acid sequence"
+            >
+            <button id="searchBtn" class="search-button" onclick="search()">
+                <span class="material-icons-outlined">search</span>
+                Search
+            </button>
+        </div>
+    </section>
+
+    <!-- Examples -->
     <section id="examples" class="examples">
-        <h2>Try These Examples</h2>
-        <div class="example-tags">
-            <span class="example-tag" onclick="setQuery('P05067');">P05067 (Amyloid beta)</span>
-            <span class="example-tag" onclick="setQuery('TP53');">TP53 (Tumour suppressor)</span>
-            <span class="example-tag" onclick="setQuery('INS');">Insulin</span>
-            <span class="example-tag" onclick="setQuery('HBB');">Hemoglobin</span>
+        <h2 class="examples-title">Try these examples</h2>
+        <div class="example-chips">
+            <div class="example-chip" onclick="setQuery('P05067')">P05067 (Amyloid beta)</div>
+            <div class="example-chip" onclick="setQuery('TP53')">TP53 (Tumor suppressor)</div>
+            <div class="example-chip" onclick="setQuery('INS')">Insulin</div>
+            <div class="example-chip" onclick="setQuery('HBB')">Hemoglobin</div>
         </div>
     </section>
 
-    <!-- Status message -->
-    <div id="status" class="status"></div>
-
-    <!-- Protein information -->
-    <div id="proteinInfo" class="protein-info">
-        <h3>Protein Information</h3>
-        <div id="infoGrid" class="info-grid"></div>
-    </div>
-
-    <!-- 3D Viewer -->
-    <div id="viewerContainer" class="viewer-container" style="display: none;">
-        <div id="viewerTitle" class="viewer-header"></div>
-        <div id="viewer"></div>
-        <div class="controls">
-            <button class="control-btn" onclick="resetView()">🔄 Reset View</button>
-            <button class="control-btn" onclick="toggleSpin()">🔄 Auto Rotate</button>
-            <button class="control-btn" onclick="downloadStructure()">💾 Download PDB</button>
-            <button class="control-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+    <!-- Status -->
+    <div class="status-container">
+        <div id="status" class="status">
+            <span class="material-icons-outlined">info</span>
+            <span id="statusText">Enter a search query to get started</span>
         </div>
     </div>
 
-    <!-- FAQ section -->
-    <section id="faq" class="faq">
-        <h2>Frequently Asked Questions</h2>
-        <details>
-            <summary>What queries can I use?</summary>
-            <p>You can search by UniProt accession (e.g. <code>P05067</code>), by common protein name (e.g. "Insulin"),
-            or by an amino acid sequence of at least 10 residues.  The app will automatically detect
-            the query type and select the appropriate search method.</p>
-        </details>
-        <details>
-            <summary>How do I rotate or zoom the structure?</summary>
-            <p>Click and drag inside the viewer to rotate the model.  Use your mouse wheel or trackpad
-            to zoom in and out.  The control buttons below the viewer let you reset the camera,
-            toggle automatic rotation and switch to full‑screen mode.</p>
-        </details>
-        <details>
-            <summary>Why don't I see a result for my sequence?</summary>
-            <p>AlphaFold predictions are available for most proteins but not all.  Ensure that your
-            sequence contains only valid amino acid letters (A, C, D, E, F, G, H, I, K, L, M, N, P,
-            Q, R, S, T, V, W, Y) and is at least 10 residues long.  If there is no matching entry
-            in UniProt or the AlphaFold database, the server will return an error.</p>
-        </details>
-        <details>
-            <summary>Can I use these models commercially?</summary>
-            <p>No.  The AlphaFold structures provided through this site are intended for non‑commercial
-            research and educational purposes only.  Consult the official AlphaFold licence and
-            <a href="https://www.deepmind.com/open-source/alphafold" target="_blank">terms of use</a>
-            for more details.</p>
-        </details>
+    <!-- Protein Info -->
+    <section id="proteinInfo" class="protein-info">
+        <div class="info-card">
+            <div class="info-header">
+                <div class="info-title" id="proteinTitle">Protein Information</div>
+                <div class="info-subtitle">Structure prediction details</div>
+            </div>
+            <div id="infoGrid" class="info-grid"></div>
+        </div>
+    </section>
+
+    <!-- Viewer -->
+    <section id="viewerSection" class="viewer-section">
+        <div class="viewer-card">
+            <div class="viewer-header">
+                <div class="viewer-title" id="viewerTitle">3D Structure</div>
+                <div class="viewer-actions">
+                    <button class="action-button" onclick="resetView()">
+                        <span class="material-icons-outlined">refresh</span>
+                        Reset
+                    </button>
+                    <button class="action-button" onclick="toggleSpin()">
+                        <span class="material-icons-outlined">3d_rotation</span>
+                        Rotate
+                    </button>
+                    <button class="action-button" onclick="downloadStructure()">
+                        <span class="material-icons-outlined">download</span>
+                        Download
+                    </button>
+                    <button class="action-button" onclick="toggleFullscreen()">
+                        <span class="material-icons-outlined">fullscreen</span>
+                        Fullscreen
+                    </button>
+                </div>
+            </div>
+            <div id="viewer"></div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="content-section">
+        <h2 class="section-title">About this tool</h2>
+        <p class="section-description">
+            This interactive viewer provides access to protein structure predictions from the AlphaFold database. 
+            Search by UniProt ID, protein name, or amino acid sequence to explore detailed 3D molecular structures.
+        </p>
+        <ul class="feature-list">
+            <li class="feature-item">
+                <div class="feature-icon">
+                    <span class="material-icons-outlined">search</span>
+                </div>
+                <div class="feature-content">
+                    <h3>Multiple search methods</h3>
+                    <p>Search using UniProt IDs, common protein names, or raw amino acid sequences</p>
+                </div>
+            </li>
+            <li class="feature-item">
+                <div class="feature-icon">
+                    <span class="material-icons-outlined">3d_rotation</span>
+                </div>
+                <div class="feature-content">
+                    <h3>Interactive visualization</h3>
+                    <p>Rotate, zoom, and explore molecular structures with advanced WebGL rendering</p>
+                </div>
+            </li>
+            <li class="feature-item">
+                <div class="feature-icon">
+                    <span class="material-icons-outlined">analytics</span>
+                </div>
+                <div class="feature-content">
+                    <h3>Detailed information</h3>
+                    <p>View protein metadata, confidence scores, and structural annotations</p>
+                </div>
+            </li>
+            <li class="feature-item">
+                <div class="feature-icon">
+                    <span class="material-icons-outlined">download</span>
+                </div>
+                <div class="feature-content">
+                    <h3>Export capabilities</h3>
+                    <p>Download structure files in standard formats for further analysis</p>
+                </div>
+            </li>
+        </ul>
     </section>
 
     <!-- Footer -->
     <footer class="footer">
-        Powered by <a href="https://alphafold.ebi.ac.uk" target="_blank">AlphaFold Database</a> &amp;
-        <a href="https://molstar.org/" target="_blank">Mol*</a> Viewer&nbsp;|&nbsp;Built with Flask &amp; Python
+        <div class="footer-content">
+            <p class="footer-text">
+                Powered by AlphaFold Database and Mol* molecular viewer
+            </p>
+            <div class="footer-links">
+                <a href="https://alphafold.ebi.ac.uk" target="_blank">AlphaFold Database</a>
+                <a href="https://molstar.org" target="_blank">Mol* Viewer</a>
+                <a href="https://deepmind.google" target="_blank">DeepMind</a>
+            </div>
+        </div>
     </footer>
 
-    <!-- Import Mol* script -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/molstar@4.18.0/build/viewer/molstar.min.js"></script>
     <script>
-        // JavaScript from original template to handle search and visualisation
         let viewer;
         let isSpinning = false;
         let currentModelUrl = '';
@@ -463,77 +741,100 @@
             document.getElementById('query').value = text;
         }
 
-        function showStatus(message, type) {
+        function showStatus(message, type, icon = 'info') {
             const status = document.getElementById('status');
+            const statusText = document.getElementById('statusText');
+            
             status.className = `status ${type}`;
-            status.innerHTML = message;
+            statusText.textContent = message;
+            
+            const iconElement = status.querySelector('.material-icons-outlined');
+            iconElement.textContent = type === 'loading' ? '' : icon;
+            
+            if (type === 'loading') {
+                iconElement.className = 'loading-spinner';
+            } else {
+                iconElement.className = 'material-icons-outlined';
+            }
         }
 
         function showProteinInfo(data) {
             const info = document.getElementById('proteinInfo');
             const grid = document.getElementById('infoGrid');
+            const title = document.getElementById('proteinTitle');
+            
+            title.textContent = data.protein_name || data.id || 'Protein Information';
+            
             const fields = [
-                { label: 'UniProt ID', value: data.id },
-                { label: 'Protein Name', value: data.protein_name },
-                { label: 'Gene Name', value: data.gene_name },
-                { label: 'Organism', value: data.organism },
-                { label: 'Length (AA)', value: data.length + ' amino acids' },
-                { label: 'Model Created', value: data.model_created ? new Date(data.model_created).toLocaleDateString() : 'Unknown' },
-                { label: 'Confidence Score', value: data.confidence_score ? Math.round(data.confidence_score) + '%' : 'N/A' }
+                { label: 'UniProt ID', value: data.id || 'N/A' },
+                { label: 'Protein Name', value: data.protein_name || 'N/A' },
+                { label: 'Gene Name', value: data.gene_name || 'N/A' },
+                { label: 'Organism', value: data.organism || 'N/A' },
+                { label: 'Length', value: data.length ? `${data.length} amino acids` : 'N/A' },
+                { label: 'Model Created', value: data.model_created ? new Date(data.model_created).toLocaleDateString() : 'N/A' },
+                { label: 'Confidence Score', value: data.confidence_score ? `${Math.round(data.confidence_score)}%` : 'N/A' },
+                { label: 'Model Version', value: data.model_version || 'N/A' }
             ];
+            
             grid.innerHTML = fields.map(field => `
                 <div class="info-item">
                     <div class="info-label">${field.label}</div>
                     <div class="info-value">${field.value}</div>
                 </div>
             `).join('');
+            
             info.style.display = 'block';
         }
 
         async function search() {
             const query = document.getElementById('query').value.trim();
             const searchBtn = document.getElementById('searchBtn');
+            
             if (!query) {
-                showStatus('❌ Please enter a search query', 'error');
+                showStatus('Please enter a search query', 'error', 'error');
                 return;
             }
-            // Disable button and show loading
+            
             searchBtn.disabled = true;
             searchBtn.innerHTML = '<div class="loading-spinner"></div>Searching...';
-            showStatus('🔍 Searching AlphaFold database...', 'loading');
+            showStatus('Searching AlphaFold database...', 'loading');
+            
             try {
                 const response = await fetch('/search', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ query })
                 });
+                
                 const data = await response.json();
+                
                 if (response.ok && data.model_url) {
-                    showStatus('✅ Structure found! Loading 3D model...', 'success');
+                    showStatus('Structure found! Loading 3D model...', 'success', 'check_circle');
                     showProteinInfo(data);
                     await loadStructure(data.model_url, data.protein_name || data.id);
                 } else {
-                    showStatus(`❌ ${data.error || 'Structure not found'}`, 'error');
+                    showStatus(data.error || 'Structure not found', 'error', 'error');
                     document.getElementById('proteinInfo').style.display = 'none';
-                    document.getElementById('viewerContainer').style.display = 'none';
+                    document.getElementById('viewerSection').style.display = 'none';
                 }
             } catch (error) {
                 console.error('Search error:', error);
-                showStatus('❌ Network error. Please try again.', 'error');
+                showStatus('Network error. Please try again.', 'error', 'error');
             } finally {
-                // Re-enable button
                 searchBtn.disabled = false;
-                searchBtn.innerHTML = '🔍 Search Structure';
+                searchBtn.innerHTML = '<span class="material-icons-outlined">search</span>Search';
             }
         }
 
         async function loadStructure(url, title) {
             try {
-                const container = document.getElementById('viewerContainer');
+                const viewerSection = document.getElementById('viewerSection');
                 const viewerTitle = document.getElementById('viewerTitle');
-                container.style.display = 'block';
+                
+                viewerSection.style.display = 'block';
                 viewerTitle.textContent = `3D Structure: ${title}`;
                 currentModelUrl = url;
+                
                 if (!viewer) {
                     viewer = await molstar.Viewer.create('viewer', {
                         layoutShowControls: false,
@@ -548,13 +849,15 @@
                 } else {
                     await viewer.clear();
                 }
+                
                 await viewer.loadStructureFromUrl(url, 'mmcif', false);
-                showStatus('✅ 3D structure loaded successfully!', 'success');
-                // Scroll to viewer
-                container.scrollIntoView({ behavior: 'smooth' });
+                showStatus('3D structure loaded successfully!', 'success', 'check_circle');
+                
+                // Smooth scroll to viewer
+                viewerSection.scrollIntoView({ behavior: 'smooth' });
             } catch (error) {
                 console.error('Structure loading error:', error);
-                showStatus('❌ Failed to load 3D structure', 'error');
+                showStatus('Failed to load 3D structure', 'error', 'error');
             }
         }
 
@@ -591,15 +894,13 @@
             }
         }
 
-        // Enable search on Enter key once DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('query').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     search();
                 }
             });
-            // Show initial instructions
-            showStatus('💡 Enter a UniProt ID, protein name, or amino acid sequence to get started', 'loading');
+            showStatus('Enter a search query to get started', 'loading');
         });
     </script>
 </body>
