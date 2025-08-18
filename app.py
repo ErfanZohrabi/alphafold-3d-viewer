@@ -104,8 +104,8 @@ def fetch_by_uniprot_id(uniprot_id):
                 return {
                     "id": entry["entryId"],
                     "organism": entry.get("organismScientificName", "Unknown"),
-                    "model_url": entry["pdbUrl"],
-                    "confidence_url": entry.get("paeUrl"),
+                    "model_url": entry.get("cifUrl"),
+                    "confidence_url": entry.get("paeImageUrl"),
                     "confidence_score": entry.get("globalMetricValue"),
                     "model_created": entry.get("modelCreatedDate"),
                     "protein_name": protein_info.get("protein_name", "Unknown"),

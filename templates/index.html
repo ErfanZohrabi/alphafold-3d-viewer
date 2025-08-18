@@ -361,7 +361,6 @@
         </div>
     </section>
 
-<<<<<<< HEAD
     <!-- About section -->
     <section id="about" class="about">
         <h2>About This Viewer</h2>
@@ -391,19 +390,6 @@
             <span class="example-tag" onclick="setQuery('TP53');">TP53 (Tumour suppressor)</span>
             <span class="example-tag" onclick="setQuery('INS');">Insulin</span>
             <span class="example-tag" onclick="setQuery('HBB');">Hemoglobin</span>
-=======
-        <div class="viewer-container" id="viewerContainer" style="display: none;">
-            <div class="viewer-header">
-                <span id="viewerTitle">3D Protein Structure</span>
-            </div>
-            <div id="viewer"></div>
-            <div class="controls">
-                <button class="control-btn" onclick="resetView()">🔄 Reset View</button>
-                <button class="control-btn" onclick="toggleSpin()">🔄 Auto Rotate</button>
-                <button class="control-btn" onclick="downloadStructure()">💾 Download PDB</button>
-                <button class="control-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
-            </div>
->>>>>>> e9a82f53dad85591bc504c85b11db45ec009bea5
         </div>
     </section>
 
@@ -417,9 +403,9 @@
     </div>
 
     <!-- 3D Viewer -->
-    <div id="viewerContainer" class="viewer-container">
+    <div id="viewerContainer" class="viewer-container" style="display: none;">
         <div id="viewerTitle" class="viewer-header"></div>
-        <iframe id="viewer"></iframe>
+        <div id="viewer"></div>
         <div class="controls">
             <button class="control-btn" onclick="resetView()">🔄 Reset View</button>
             <button class="control-btn" onclick="toggleSpin()">🔄 Auto Rotate</button>
@@ -545,17 +531,9 @@
             try {
                 const container = document.getElementById('viewerContainer');
                 const viewerTitle = document.getElementById('viewerTitle');
-<<<<<<< HEAD
                 container.style.display = 'block';
                 viewerTitle.textContent = `3D Structure: ${title}`;
                 currentModelUrl = url;
-=======
-
-                container.style.display = 'block';
-                viewerTitle.textContent = `3D Structure: ${title}`;
-                currentModelUrl = url;
-
->>>>>>> e9a82f53dad85591bc504c85b11db45ec009bea5
                 if (!viewer) {
                     viewer = await molstar.Viewer.create('viewer', {
                         layoutShowControls: false,
