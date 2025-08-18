@@ -75,7 +75,7 @@ def get_structure(uniprot_id):
 
 def is_uniprot_id(query):
     """Check if query matches UniProt ID pattern"""
-    pattern = r'^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$'
+    pattern = r'^([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})$'
     return bool(re.match(pattern, query.upper()))
 
 def is_protein_sequence(query):
