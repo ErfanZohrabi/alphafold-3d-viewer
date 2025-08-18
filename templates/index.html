@@ -321,6 +321,7 @@
             <div class="controls">
                 <button class="control-btn" onclick="resetView()">🔄 Reset View</button>
                 <button class="control-btn" onclick="toggleSpin()">🔄 Auto Rotate</button>
+                <button class="control-btn" onclick="downloadStructure()">💾 Download PDB</button>
                 <button class="control-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
             </div>
         </div>
@@ -333,6 +334,7 @@
     <script>
         let viewer;
         let isSpinning = false;
+        let currentModelUrl = '';
 
         function setQuery(text) {
             document.getElementById('query').value = text;
@@ -414,9 +416,10 @@
             try {
                 const container = document.getElementById('viewerContainer');
                 const viewerTitle = document.getElementById('viewerTitle');
-                
+
                 container.style.display = 'block';
                 viewerTitle.textContent = `3D Structure: ${title}`;
+                currentModelUrl = url;
 
                 if (!viewer) {
                     viewer = await molstar.Viewer.create('viewer', {
@@ -443,6 +446,12 @@
             } catch (error) {
                 console.error('Structure loading error:', error);
                 showStatus('❌ Failed to load 3D structure', 'error');
+            }
+        }
+
+        function downloadStructure() {
+            if (currentModelUrl) {
+                window.open(currentModelUrl, '_blank');
             }
         }
 
