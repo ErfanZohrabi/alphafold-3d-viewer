@@ -1,42 +1,57 @@
 import pytest
-from app import is_uniprot_id, app
+from app import app, is_uniprot_id, build_afdb_pdb_url
 
-def test_set_query_triggers_search():
+
+def test_health_endpoint():
     client = app.test_client()
-    response = client.get('/')
-    html = response.get_data(as_text=True)
-    start = html.find('function setQuery')
-    end = html.find('}', start)
-    assert 'search();' in html[start:end]
+    res = client.get('/api/health')
+    assert res.status_code == 200
+    assert res.get_json() == {"status": "ok"}
 
-def test_search_endpoint_with_mock(monkeypatch):
-    mock_data = {
-        "id": "P05067",
-        "model_url": "https://example.com/P05067.cif",
-        "protein_name": "Amyloid beta",
+
+def test_is_uniprot_id():
+    assert is_uniprot_id('P05067')
+    assert not is_uniprot_id('insulin')
+
+
+def test_search_by_uniprot(monkeypatch):
+    def fake_head(url, timeout=10):
+        class R:
+            status_code = 200
+        return R()
+
+    monkeypatch.setattr('app.requests.head', fake_head)
+    client = app.test_client()
+    res = client.post('/search', json={'query': 'P05067'})
+    assert res.status_code == 200
+    assert res.get_json() == {
+        'accession': 'P05067',
+        'pdb_url': build_afdb_pdb_url('P05067')
     }
 
-    def mock_fetch(uniprot_id):
-        return mock_data
 
-    monkeypatch.setattr('app.fetch_by_uniprot_id', mock_fetch)
+def test_search_by_name(monkeypatch):
+    def fake_lookup(name):
+        return 'P01308'
+
+    def fake_head(url, timeout=10):
+        class R:
+            status_code = 200
+        return R()
+
+    monkeypatch.setattr('app.uniprot_lookup_by_name', fake_lookup)
+    monkeypatch.setattr('app.requests.head', fake_head)
     client = app.test_client()
-    response = client.post('/search', json={"query": "P05067"})
-    assert response.status_code == 200
-    assert response.get_json() == mock_data
+    res = client.post('/search', json={'query': 'insulin'})
+    assert res.status_code == 200
+    assert res.get_json() == {
+        'accession': 'P01308',
+        'pdb_url': build_afdb_pdb_url('P01308')
+    }
 
-def test_valid_uniprot_id():
-    assert is_uniprot_id("P05067")
 
-def test_invalid_uniprot_id_with_extra_text():
-    assert not is_uniprot_id("P05067 extra")
-
-def test_invalid_short_code():
-    assert not is_uniprot_id("P53")
-
-def test_index_page_examples_present():
+def test_proxy_requires_url():
     client = app.test_client()
-    response = client.get('/')
-    assert response.status_code == 200
-    html = response.get_data(as_text=True)
-    assert "BRCA1" in html
+    res = client.get('/proxy')
+    assert res.status_code == 400
+
