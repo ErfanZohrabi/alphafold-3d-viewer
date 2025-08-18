@@ -4,9 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlphaFold 3D Protein Viewer</title>
-    <script src="https://unpkg.com/molstar/build/molstar.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/molstar/build/molstar.css">
+    <!-- Import Mol* styles for the embedded viewer -->
+    <link href="https://cdn.jsdelivr.net/npm/molstar@4.18.0/build/viewer/molstar.min.css" rel="stylesheet">
+    <!--
+      This page restructures the original index.html template from the
+      `alphafold-3d-viewer` project to provide a more polished and
+      information‑rich experience.  The navigation bar, hero section,
+      descriptive sections (About, Examples, FAQ) and footer have been
+      added to make the application easier to understand and use.  The
+      existing search functionality and Mol* integration are preserved.
+    -->
     <style>
+        /* Global styles */
         * {
             margin: 0;
             padding: 0;
@@ -15,70 +24,103 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
         }
 
-        .container {
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        /* Navigation bar */
+        .navbar {
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            width: 100%;
+        }
+
+        .nav-container {
             max-width: 1200px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
         }
 
-        .header {
-            background: linear-gradient(135deg, #2c3e50, #3498db);
-            color: white;
-            padding: 30px;
+        .brand {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links li a {
+            font-weight: 500;
+            padding: 5px 0;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links li a:hover {
+            color: #764ba2;
+        }
+
+        /* Hero section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
             text-align: center;
+            padding: 80px 20px;
         }
 
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
             font-weight: 300;
         }
 
-        .header p {
+        .hero p {
             font-size: 1.2rem;
+            margin-bottom: 40px;
             opacity: 0.9;
-        }
-
-        .search-section {
-            padding: 30px;
-            background: white;
         }
 
         .search-container {
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
+            justify-content: center;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
         .search-input {
             flex: 1;
-            min-width: 300px;
+            min-width: 260px;
             padding: 15px;
             font-size: 16px;
-            border: 2px solid #ddd;
+            border: 2px solid #fff;
             border-radius: 10px;
-            transition: all 0.3s ease;
+            outline: none;
+            color: #333;
         }
 
-        .search-input:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+        .search-input::placeholder {
+            color: rgba(0, 0, 0, 0.5);
         }
 
         .search-btn {
             padding: 15px 30px;
             font-size: 16px;
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: #3498db;
             color: white;
             border: none;
             border-radius: 10px;
@@ -88,38 +130,49 @@
         }
 
         .search-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+            background: #2980b9;
         }
 
         .search-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            transform: none;
         }
 
-        .examples {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
+        /* Sections */
+        section {
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .about p {
+            max-width: 800px;
             margin-bottom: 20px;
         }
 
-        .examples h3 {
-            color: #2c3e50;
-            margin-bottom: 10px;
+        .about ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            max-width: 800px;
         }
 
-        .example-tags {
+        .examples .example-tags {
             display: flex;
-            gap: 10px;
             flex-wrap: wrap;
+            gap: 10px;
         }
 
         .example-tag {
             background: #3498db;
             color: white;
-            padding: 5px 12px;
+            padding: 8px 15px;
             border-radius: 20px;
             font-size: 14px;
             cursor: pointer;
@@ -128,9 +181,10 @@
 
         .example-tag:hover {
             background: #2980b9;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
         }
 
+        /* Status message */
         .status {
             padding: 15px;
             border-radius: 10px;
@@ -157,17 +211,13 @@
             display: block;
         }
 
+        /* Protein information */
         .protein-info {
             background: #f8f9fa;
             border-radius: 10px;
             padding: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 40px;
             display: none;
-        }
-
-        .protein-info h3 {
-            color: #2c3e50;
-            margin-bottom: 15px;
         }
 
         .info-grid {
@@ -193,11 +243,14 @@
             color: #555;
         }
 
+        /* 3D Viewer */
         .viewer-container {
             background: white;
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            display: none;
         }
 
         .viewer-header {
@@ -237,102 +290,174 @@
             background: #7f8c8d;
         }
 
+        /* FAQ */
+        .faq details {
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px 15px;
+            background: #fff;
+        }
+
+        .faq summary {
+            cursor: pointer;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .faq summary::marker {
+            color: #3498db;
+        }
+
+        .faq p {
+            margin-top: 10px;
+        }
+
+        /* Footer */
         .footer {
             background: #2c3e50;
             color: white;
             text-align: center;
-            padding: 20px;
+            padding: 30px 20px;
+            font-size: 0.9rem;
         }
 
+        .footer a {
+            color: #85c1e9;
+        }
+
+        /* Responsive design */
         @media (max-width: 768px) {
-            .search-container {
-                flex-direction: column;
-            }
-            
-            .search-input {
-                min-width: auto;
-            }
-            
-            .header h1 {
+            .hero h1 {
                 font-size: 2rem;
             }
-            
-            .info-grid {
-                grid-template-columns: 1fr;
+            .nav-links {
+                display: none;
             }
-        }
-
-        .loading-spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-right: 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🧬 AlphaFold 3D Protein Viewer</h1>
-            <p>Explore protein structures from the AlphaFold database</p>
+    <!-- Navigation bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="brand">AlphaFold 3D Viewer</div>
+            <ul class="nav-links">
+                <li><a href="#hero">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#examples">Examples</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
         </div>
+    </nav>
 
-        <div class="search-section">
-            <div class="search-container">
-                <input type="text" id="query" class="search-input" 
-                       placeholder="Enter UniProt ID (P05067), protein name (amyloid), or amino acid sequence...">
-                <button onclick="search()" class="search-btn" id="searchBtn">
-                    🔍 Search Structure
-                </button>
-            </div>
-
-            <div class="examples">
-                <h3>💡 Try these examples:</h3>
-                <div class="example-tags">
-                    <span class="example-tag" onclick="setQuery('P05067')">P05067 (Amyloid beta)</span>
-                    <span class="example-tag" onclick="setQuery('P53')">P53 (Tumor suppressor)</span>
-                    <span class="example-tag" onclick="setQuery('insulin')">Insulin</span>
-                    <span class="example-tag" onclick="setQuery('hemoglobin')">Hemoglobin</span>
-                </div>
-            </div>
-
-            <div id="status" class="status"></div>
-
-            <div id="proteinInfo" class="protein-info">
-                <h3>📋 Protein Information</h3>
-                <div id="infoGrid" class="info-grid"></div>
-            </div>
+    <!-- Hero section with search bar -->
+    <section id="hero" class="hero">
+        <h1>Explore Biomolecular Structures</h1>
+        <p>Search proteins and visualise their predicted 3D structures using the AlphaFold database.</p>
+        <div class="search-container">
+            <input type="text" id="query" class="search-input" placeholder="Enter UniProt ID, protein name, or sequence">
+            <button id="searchBtn" class="search-btn" onclick="search()">🔍 Search Structure</button>
         </div>
+    </section>
 
-        <div class="viewer-container" id="viewerContainer" style="display: none;">
-            <div class="viewer-header">
-                <span id="viewerTitle">3D Protein Structure</span>
-            </div>
-            <div id="viewer"></div>
-            <div class="controls">
-                <button class="control-btn" onclick="resetView()">🔄 Reset View</button>
-                <button class="control-btn" onclick="toggleSpin()">🔄 Auto Rotate</button>
-                <button class="control-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
-            </div>
+    <!-- About section -->
+    <section id="about" class="about">
+        <h2>About This Viewer</h2>
+        <p>
+            This web‑app provides a simple interface to the <strong>AlphaFold</strong> database.  It allows you to
+            search for proteins by <em>UniProt ID</em>, common name or raw amino acid sequence, and then
+            interactively view their predicted 3D structures.  Results are presented using the
+            <a href="https://molstar.org/" target="_blank">Mol*</a> viewer, an advanced WebGL visualiser for
+            macromolecules.  Please note that these models are predictions and should be used for
+            <strong>research and educational purposes only</strong>.
+        </p>
+        <ul>
+            <li>Enter a valid UniProt identifier (e.g., <code>P05067</code>), protein name, or a peptide sequence of
+                at least 10 residues.</li>
+            <li>The app queries the AlphaFold API and returns the best available model along with
+                metadata about the protein.</li>
+            <li>Interact with the 3D structure: rotate, zoom, reset the view, spin the model or
+                download the underlying PDB file.</li>
+        </ul>
+    </section>
+
+    <!-- Examples section -->
+    <section id="examples" class="examples">
+        <h2>Try These Examples</h2>
+        <div class="example-tags">
+            <span class="example-tag" onclick="setQuery('P05067');">P05067 (Amyloid beta)</span>
+            <span class="example-tag" onclick="setQuery('TP53');">TP53 (Tumour suppressor)</span>
+            <span class="example-tag" onclick="setQuery('INS');">Insulin</span>
+            <span class="example-tag" onclick="setQuery('HBB');">Hemoglobin</span>
         </div>
+    </section>
 
-        <div class="footer">
-            <p>Powered by AlphaFold Database & Mol* Viewer | Built with Flask & Python</p>
+    <!-- Status message -->
+    <div id="status" class="status"></div>
+
+    <!-- Protein information -->
+    <div id="proteinInfo" class="protein-info">
+        <h3>Protein Information</h3>
+        <div id="infoGrid" class="info-grid"></div>
+    </div>
+
+    <!-- 3D Viewer -->
+    <div id="viewerContainer" class="viewer-container">
+        <div id="viewerTitle" class="viewer-header"></div>
+        <iframe id="viewer"></iframe>
+        <div class="controls">
+            <button class="control-btn" onclick="resetView()">🔄 Reset View</button>
+            <button class="control-btn" onclick="toggleSpin()">🔄 Auto Rotate</button>
+            <button class="control-btn" onclick="downloadStructure()">💾 Download PDB</button>
+            <button class="control-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
         </div>
     </div>
 
+    <!-- FAQ section -->
+    <section id="faq" class="faq">
+        <h2>Frequently Asked Questions</h2>
+        <details>
+            <summary>What queries can I use?</summary>
+            <p>You can search by UniProt accession (e.g. <code>P05067</code>), by common protein name (e.g. "Insulin"),
+            or by an amino acid sequence of at least 10 residues.  The app will automatically detect
+            the query type and select the appropriate search method.</p>
+        </details>
+        <details>
+            <summary>How do I rotate or zoom the structure?</summary>
+            <p>Click and drag inside the viewer to rotate the model.  Use your mouse wheel or trackpad
+            to zoom in and out.  The control buttons below the viewer let you reset the camera,
+            toggle automatic rotation and switch to full‑screen mode.</p>
+        </details>
+        <details>
+            <summary>Why don't I see a result for my sequence?</summary>
+            <p>AlphaFold predictions are available for most proteins but not all.  Ensure that your
+            sequence contains only valid amino acid letters (A, C, D, E, F, G, H, I, K, L, M, N, P,
+            Q, R, S, T, V, W, Y) and is at least 10 residues long.  If there is no matching entry
+            in UniProt or the AlphaFold database, the server will return an error.</p>
+        </details>
+        <details>
+            <summary>Can I use these models commercially?</summary>
+            <p>No.  The AlphaFold structures provided through this site are intended for non‑commercial
+            research and educational purposes only.  Consult the official AlphaFold licence and
+            <a href="https://www.deepmind.com/open-source/alphafold" target="_blank">terms of use</a>
+            for more details.</p>
+        </details>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        Powered by <a href="https://alphafold.ebi.ac.uk" target="_blank">AlphaFold Database</a> &amp;
+        <a href="https://molstar.org/" target="_blank">Mol*</a> Viewer&nbsp;|&nbsp;Built with Flask &amp; Python
+    </footer>
+
+    <!-- Import Mol* script -->
+    <script src="https://cdn.jsdelivr.net/npm/molstar@4.18.0/build/viewer/molstar.min.js"></script>
     <script>
+        // JavaScript from original template to handle search and visualisation
         let viewer;
         let isSpinning = false;
+        let currentModelUrl = '';
 
         function setQuery(text) {
             document.getElementById('query').value = text;
@@ -347,7 +472,6 @@
         function showProteinInfo(data) {
             const info = document.getElementById('proteinInfo');
             const grid = document.getElementById('infoGrid');
-            
             const fields = [
                 { label: 'UniProt ID', value: data.id },
                 { label: 'Protein Name', value: data.protein_name },
@@ -357,40 +481,33 @@
                 { label: 'Model Created', value: data.model_created ? new Date(data.model_created).toLocaleDateString() : 'Unknown' },
                 { label: 'Confidence Score', value: data.confidence_score ? Math.round(data.confidence_score) + '%' : 'N/A' }
             ];
-
             grid.innerHTML = fields.map(field => `
                 <div class="info-item">
                     <div class="info-label">${field.label}</div>
                     <div class="info-value">${field.value}</div>
                 </div>
             `).join('');
-
             info.style.display = 'block';
         }
 
         async function search() {
             const query = document.getElementById('query').value.trim();
             const searchBtn = document.getElementById('searchBtn');
-            
             if (!query) {
                 showStatus('❌ Please enter a search query', 'error');
                 return;
             }
-
             // Disable button and show loading
             searchBtn.disabled = true;
             searchBtn.innerHTML = '<div class="loading-spinner"></div>Searching...';
             showStatus('🔍 Searching AlphaFold database...', 'loading');
-
             try {
                 const response = await fetch('/search', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ query })
                 });
-
                 const data = await response.json();
-
                 if (response.ok && data.model_url) {
                     showStatus('✅ Structure found! Loading 3D model...', 'success');
                     showProteinInfo(data);
@@ -414,10 +531,9 @@
             try {
                 const container = document.getElementById('viewerContainer');
                 const viewerTitle = document.getElementById('viewerTitle');
-                
                 container.style.display = 'block';
                 viewerTitle.textContent = `3D Structure: ${title}`;
-
+                currentModelUrl = url;
                 if (!viewer) {
                     viewer = await molstar.Viewer.create('viewer', {
                         layoutShowControls: false,
@@ -432,17 +548,19 @@
                 } else {
                     await viewer.clear();
                 }
-
                 await viewer.loadStructureFromUrl(url, 'mmcif', false);
-                
                 showStatus('✅ 3D structure loaded successfully!', 'success');
-                
                 // Scroll to viewer
                 container.scrollIntoView({ behavior: 'smooth' });
-                
             } catch (error) {
                 console.error('Structure loading error:', error);
                 showStatus('❌ Failed to load 3D structure', 'error');
+            }
+        }
+
+        function downloadStructure() {
+            if (currentModelUrl) {
+                window.open(currentModelUrl, '_blank');
             }
         }
 
@@ -473,15 +591,16 @@
             }
         }
 
-        // Enable search on Enter key
-        document.getElementById('query').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                search();
-            }
+        // Enable search on Enter key once DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('query').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    search();
+                }
+            });
+            // Show initial instructions
+            showStatus('💡 Enter a UniProt ID, protein name, or amino acid sequence to get started', 'loading');
         });
-
-        // Show initial instructions
-        showStatus('💡 Enter a UniProt ID, protein name, or amino acid sequence to get started', 'loading');
     </script>
 </body>
 </html>
