@@ -49,9 +49,10 @@
     // Boot the Mol* viewer lazily. This avoids creating the viewer until
     // needed and prevents multiple instances from being created.
     let viewer = null;
-    function makeViewer() {
+    async function makeViewer() {
       if (viewer) return viewer;
-      viewer = new molstar.Viewer('viewer', {
+      
+      viewer = await molstar.Viewer.create('viewer', {
         layoutIsExpanded: false,
         layoutShowControls: true,
         layoutShowRemoteState: false,
@@ -63,21 +64,23 @@
 
     // Load a PDB from the proxied URL and update the status text.
     async function loadAccession(acc, pdbUrl) {
-      const v = makeViewer();
+      const v = await makeViewer();
       document.getElementById('status').textContent = `Loading ${acc}…`;
       try {
-        if (v.plugin && typeof v.plugin.clear === 'function') {
-          await v.plugin.clear();
-        } else if (typeof v.clear === 'function') {
-          await v.clear();
-        }
+        // Clear existing structures
+        await v.plugin.clear();
+        
         // Build the proxied URL using Flask's url_for to respect prefixes.
         const proxyBase = {{ url_for('proxy', _external=false) | tojson }};
         const proxied = `${proxyBase}?url=${encodeURIComponent(pdbUrl)}`;
+        
+        // Load the structure using a simpler approach
         await v.loadStructureFromUrl(proxied, 'pdb');
+        
         document.getElementById('status').textContent = `Loaded ${acc}`;
       } catch (e) {
-        document.getElementById('status').textContent = `Failed to load ${acc}: ${e}`;
+        console.error('Loading error:', e);
+        document.getElementById('status').textContent = `Failed to load ${acc}: ${e.message || e}`;
       }
     }
 
@@ -90,18 +93,18 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query }),
       });
-      let data;
+      let searchData;
       try {
-        data = await res.json();
+        searchData = await res.json();
       } catch (err) {
         document.getElementById('status').textContent = 'Search failed: invalid response';
         return;
       }
       if (!res.ok) {
-        document.getElementById('status').textContent = data.error || 'Search failed';
+        document.getElementById('status').textContent = searchData.error || 'Search failed';
         return;
       }
-      const { accession, pdb_url } = data;
+      const { accession, pdb_url } = searchData;
       await loadAccession(accession, pdb_url);
     }
 
@@ -111,12 +114,13 @@
     });
     document.getElementById('reset').addEventListener('click', async () => {
       if (!viewer) return;
-      if (viewer.plugin && typeof viewer.plugin.clear === 'function') {
+      try {
         await viewer.plugin.clear();
-      } else if (typeof viewer.clear === 'function') {
-        await viewer.clear();
+        document.getElementById('status').textContent = 'Viewer cleared';
+      } catch (e) {
+        console.error('Reset error:', e);
+        document.getElementById('status').textContent = 'Failed to clear viewer';
       }
-      document.getElementById('status').textContent = 'Viewer cleared';
     });
     document.querySelectorAll('[data-example]').forEach(a =>
       a.addEventListener('click', () => {
