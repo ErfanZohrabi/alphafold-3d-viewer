@@ -1,21 +1,50 @@
-# 🧬 AlphaFold 3D Protein Viewer
+# 🧬 Enhanced AlphaFold & PDB 3D Protein Viewer
 
-A modern web application for exploring and visualizing protein structures from the AlphaFold database. Built with Flask and featuring an interactive 3D viewer powered by Mol*.
+A comprehensive web application for exploring and visualizing protein structures from both AlphaFold database and Protein Data Bank (PDB). Built with Flask and featuring an advanced 3D viewer powered by Mol* with extensive customization options.
 
-![AlphaFold Viewer](https://img.shields.io/badge/Status-Active-green)
+![AlphaFold Viewer](https://img.shields.io/badge/Status-Enhanced-brightgreen)
 ![Python](https://img.shields.io/badge/Python-3.11+-blue)
 ![Flask](https://img.shields.io/badge/Flask-2.3.3-blue)
+![Mol*](https://img.shields.io/badge/Mol*-3.0-purple)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
-## 🌟 Features
+## 🌟 Enhanced Features
 
-- **🔍 Multi-Search Options**: Search by UniProt ID, protein name, or amino acid sequence
-- **🎨 Interactive 3D Visualization**: Powered by Mol* viewer with full rotation, zoom, and inspection controls
-- **📊 Detailed Protein Information**: View organism, gene names, confidence scores, and more
-- **📱 Responsive Design**: Works seamlessly on desktop and mobile devices
-- **⚡ Real-time Data**: Fetches latest structures directly from AlphaFold database
-- **💾 Easy Downloads**: Save predicted structures in PDB format with a single click
-- **🚀 Easy Deployment**: Ready for deployment on Render, Railway, Heroku, or Vercel
+### � **Dual Database Support**
+- **AlphaFold Database**: AI-predicted protein structures with confidence scores
+- **Protein Data Bank**: Experimental structures from X-ray, NMR, and cryo-EM
+- **Smart Detection**: Automatically identifies UniProt IDs, PDB IDs, and protein names
+- **Source Comparison**: View structures from multiple sources side-by-side
+
+### 🎨 **Advanced 3D Visualization**
+- **Multiple Representations**: Cartoon, Surface, Ball & Stick, Spacefill, Ribbon
+- **Color Schemes**: By Chain, Confidence, Secondary Structure, Element, Residue
+- **Interactive Controls**: Full rotation, zoom, and inspection capabilities
+- **High-Quality Rendering**: Powered by Mol* with WebGL acceleration
+
+### 📊 **Comprehensive Protein Information**
+- **Detailed Metadata**: Protein name, gene, organism, molecular weight
+- **Structural Info**: Resolution, experimental method, deposition date
+- **Functional Data**: EC numbers, GO terms, protein function descriptions
+- **Sequence Information**: Length, mass, and sequence-related properties
+
+### � **Export Capabilities**
+- **Structure Download**: PDB format export with original data
+- **Image Export**: High-resolution screenshots (framework ready)
+- **Multiple Formats**: Support for PDB and mmCIF formats
+- **Batch Processing**: Ready for multiple structure exports
+
+### 🎛️ **Professional Interface**
+- **Modern Design**: Clean, responsive interface with dark mode support
+- **Sidebar Controls**: Organized visualization and export controls
+- **Source Tabs**: Easy switching between structure sources
+- **Mobile Responsive**: Optimized for desktop and mobile devices
+
+### 🔍 **Enhanced Search**
+- **Multi-Query Support**: UniProt ID, PDB ID, or protein name
+- **Smart Suggestions**: Error messages with helpful suggestions
+- **Example Gallery**: 8 diverse example proteins with descriptions
+- **Real-time Validation**: Input validation with immediate feedback
 
 ## 🚀 Quick Start
 
@@ -23,12 +52,13 @@ A modern web application for exploring and visualizing protein structures from t
 
 - Python 3.11 or higher
 - pip package manager
+- Modern web browser with WebGL support
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/alphafold-3d-viewer.git
+   git clone https://github.com/ErfanZohrabi/alphafold-3d-viewer.git
    cd alphafold-3d-viewer
    ```
 
@@ -47,6 +77,89 @@ A modern web application for exploring and visualizing protein structures from t
    ```bash
    python app.py
    ```
+
+5. **Open in browser**
+   Navigate to `http://localhost:5000` or the displayed URL
+
+## 🎯 Usage Examples
+
+### Search Options
+
+#### **UniProt ID Search**
+```
+P05067  # Amyloid-β precursor protein
+TP53    # Tumor protein p53
+```
+
+#### **PDB ID Search**
+```
+2HHB    # Hemoglobin (classic example)
+1A2B    # Various protein structures
+```
+
+#### **Protein Name Search**
+```
+insulin      # Insulin hormone
+hemoglobin   # Oxygen transport protein
+lysozyme     # Antimicrobial enzyme
+```
+
+### Visualization Controls
+
+1. **Representation**: Choose how the protein is displayed
+   - **Cartoon**: Shows secondary structure (default)
+   - **Surface**: Molecular surface representation
+   - **Ball & Stick**: Atomic detail view
+   - **Spacefill**: Van der Waals spheres
+
+2. **Color Schemes**: Different coloring methods
+   - **By Chain**: Different colors for each protein chain
+   - **By Confidence**: AlphaFold confidence scores (blue=high, red=low)
+   - **Secondary Structure**: Alpha helices, beta sheets, loops
+   - **By Element**: Atomic elements (carbon, oxygen, nitrogen, etc.)
+
+## 🏗️ Architecture
+
+### Backend (Flask)
+```
+app.py
+├── Search endpoints (/search)
+├── Metadata API (/api/metadata)
+├── Export functionality (/api/export)
+├── Structure proxy (/proxy)
+└── Health check (/api/health)
+```
+
+### Frontend (Mol* + Vanilla JS)
+```
+templates/index.html
+├── Modern responsive UI
+├── Mol* 3D viewer integration
+├── Search and visualization controls
+├── Protein information display
+└── Export functionality
+```
+
+### Data Sources
+- **AlphaFold Database**: AI-predicted structures
+- **Protein Data Bank**: Experimental structures  
+- **UniProt API**: Protein metadata and annotations
+
+## 🧪 Testing
+
+Run the enhanced test suite:
+```bash
+python test_enhanced.py
+```
+
+Run specific tests:
+```bash
+# Test basic functions
+python -c "from test_enhanced import test_basic_functions; test_basic_functions()"
+
+# Test Flask endpoints
+python -c "from test_enhanced import test_flask_app; test_flask_app()"
+```
 
 5. **Open your browser**
    ```
