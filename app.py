@@ -427,5 +427,39 @@ def proxy() -> Response:
 
 
 if __name__ == "__main__":  # pragma: no cover
-    app.run(host="0.0.0.0", port=APP_PORT)
+    import sys
+    import socket
+    
+    def is_port_available(port):
+        """Check if a port is available."""
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(('0.0.0.0', port))
+                return True
+        except OSError:
+            return False
+    
+    # Check for port argument
+    port = APP_PORT
+    for i, arg in enumerate(sys.argv):
+        if arg == '--port' and i + 1 < len(sys.argv):
+            try:
+                port = int(sys.argv[i + 1])
+            except ValueError:
+                print(f"Invalid port number: {sys.argv[i + 1]}")
+                sys.exit(1)
+    
+    # Try different ports if the specified one is busy
+    available_port = None
+    for attempt_port in [port, 5001, 5002, 5003, 8000, 8080]:
+        if is_port_available(attempt_port):
+            available_port = attempt_port
+            break
+    
+    if available_port:
+        print(f"🚀 Starting AlphaFold 3D Protein Viewer on port {available_port}")
+        print(f"📱 Open http://localhost:{available_port} in your browser")
+        app.run(host="0.0.0.0", port=available_port, debug=False)
+    else:
+        print("❌ Could not find an available port. Please stop other services or specify a different port.")
 

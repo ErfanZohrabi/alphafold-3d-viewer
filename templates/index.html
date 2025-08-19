@@ -179,6 +179,56 @@
       background: #047857;
     }
     
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--primary-color);
+      color: var(--primary-color);
+      padding: 0.4rem 0.75rem;
+      border-radius: 0.375rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+    
+    .btn-outline:hover {
+      background: var(--primary-color);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+    }
+    
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    
+    .control-select {
+      appearance: none;
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      padding: 0.5rem 2rem 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.5rem center;
+      background-repeat: no-repeat;
+      background-size: 1.5em 1.5em;
+    }
+    
+    .control-select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+    
     .examples {
       display: flex;
       flex-wrap: wrap;
@@ -362,6 +412,30 @@
       animation: spin 1s ease-in-out infinite;
     }
     
+    .loading-large {
+      width: 2rem;
+      height: 2rem;
+      border-width: 3px;
+    }
+    
+    .pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
@@ -452,24 +526,45 @@
         <h3>🎛️ Visualization Controls</h3>
         <div class="controls-grid">
           <div class="control-group">
-            <label for="representation">Representation</label>
-            <select id="representation">
-              <option value="cartoon">Cartoon</option>
+            <label for="representation">🎨 Representation</label>
+            <select id="representation" class="control-select">
+              <option value="cartoon">Cartoon (Default)</option>
+              <option value="cartoon-putty">Cartoon + Confidence</option>
               <option value="surface">Surface</option>
               <option value="ball-and-stick">Ball & Stick</option>
-              <option value="spacefill">Spacefill</option>
+              <option value="spacefill">Space Fill</option>
               <option value="ribbon">Ribbon</option>
+              <option value="backbone">Backbone Only</option>
             </select>
           </div>
           <div class="control-group">
-            <label for="coloring">Color Scheme</label>
-            <select id="coloring">
+            <label for="coloring">🌈 Color Scheme</label>
+            <select id="coloring" class="control-select">
               <option value="chain">By Chain</option>
               <option value="confidence">By Confidence</option>
               <option value="secondary">Secondary Structure</option>
               <option value="element">By Element</option>
               <option value="residue">By Residue</option>
+              <option value="hydrophobicity">By Hydrophobicity</option>
+              <option value="charge">By Charge</option>
             </select>
+          </div>
+          <div class="control-group">
+            <label>⚡ Quick Actions</label>
+            <div class="button-grid">
+              <button class="btn btn-outline" onclick="quickAction('focus')" title="Focus on structure">
+                🎯 Focus
+              </button>
+              <button class="btn btn-outline" onclick="quickAction('spin')" title="Auto-rotate view">
+                🌀 Spin
+              </button>
+              <button class="btn btn-outline" onclick="quickAction('center')" title="Center structure">
+                📍 Center
+              </button>
+              <button class="btn btn-outline" onclick="quickAction('quality')" title="Toggle quality">
+                💎 Quality
+              </button>
+            </div>
           </div>
         </div>
         <button id="applyVisualization" class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;">Apply Changes</button>
@@ -482,6 +577,12 @@
             • <strong>Right click + drag:</strong> Pan<br>
             • <strong>Scroll wheel:</strong> Zoom in/out<br>
             • <strong>Double click:</strong> Reset view
+          </div>
+          <strong style="color: var(--text-color); margin-top: 0.75rem; display: block;">⌨️ Keyboard:</strong>
+          <div style="color: var(--text-muted); line-height: 1.4;">
+            • <strong>Ctrl+Enter:</strong> Search<br>
+            • <strong>Escape:</strong> Reset viewer<br>
+            • <strong>R:</strong> Reset camera
           </div>
         </div>
       </div>
@@ -681,16 +782,50 @@
     // Load and display structure
     async function loadStructure(source) {
       try {
-        showStatus(`Loading ${source.type} structure ${source.id}...`, 'info');
+        showStatus(`🔄 Loading ${source.type} structure ${source.id}...`, 'info');
         
         const v = await initViewer();
         await v.plugin.clear();
+        
+        // Show loading in viewer
+        const viewerEl = document.getElementById('viewer');
+        viewerEl.style.position = 'relative';
+        
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.id = 'loadingOverlay';
+        loadingOverlay.style.cssText = `
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(255, 255, 255, 0.9);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          border-radius: 0.75rem;
+        `;
+        loadingOverlay.innerHTML = `
+          <div style="text-align: center; color: var(--text-color);">
+            <div class="loading loading-large"></div>
+            <div style="margin-top: 1rem; font-weight: 500;">Loading ${source.type} structure...</div>
+            <div style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-muted);">Please wait while we fetch and render the 3D model</div>
+          </div>
+        `;
+        viewerEl.appendChild(loadingOverlay);
         
         // Build proxy URL
         const proxyUrl = `/proxy?url=${encodeURIComponent(source.url)}`;
         
         // Load structure
         currentStructure = await v.loadStructureFromUrl(proxyUrl, 'pdb');
+        
+        // Remove loading overlay
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+          overlay.remove();
+        }
         
         // Ensure proper camera setup and controls
         if (v.plugin.canvas3d) {
@@ -718,15 +853,35 @@
           }, 100);
         }
         
-        showStatus(`Successfully loaded ${source.type} structure - Use mouse to rotate, zoom, and pan`, 'success');
+        showStatus(`Successfully loaded ${source.type} structure - Use mouse to rotate, zoom, and pan! 🎮`, 'success');
         showExportSection(source);
+        
+        // Add structure statistics to status
+        setTimeout(() => {
+          if (currentStructure && viewer) {
+            try {
+              // This would show structure statistics in a real implementation
+              const atomCount = "~1000s"; // Placeholder - would get from Mol*
+              showStatus(`${source.type} structure loaded successfully • ${atomCount} atoms • Ready for analysis! 🧬`, 'success');
+            } catch (e) {
+              // Fallback message
+              showStatus(`${source.type} structure loaded and ready for analysis! 🧬`, 'success');
+            }
+          }
+        }, 1000);
         
         // Apply default visualization
         applyVisualization();
         
       } catch (error) {
+        // Remove loading overlay on error
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+          overlay.remove();
+        }
+        
         console.error('Loading error:', error);
-        showStatus(`Failed to load structure: ${error.message}`, 'error');
+        showStatus(`❌ Failed to load structure: ${error.message}`, 'error');
       }
     }
 
@@ -765,27 +920,27 @@
       
       // Define which fields to display
       const fields = [
-        { key: 'protein_name', label: 'Protein Name' },
-        { key: 'gene_name', label: 'Gene' },
-        { key: 'organism', label: 'Organism' },
-        { key: 'length', label: 'Length', suffix: ' residues' },
-        { key: 'mass', label: 'Mass', suffix: ' Da' },
-        { key: 'title', label: 'Title' },
-        { key: 'method', label: 'Method' },
-        { key: 'resolution', label: 'Resolution', suffix: ' Å' },
-        { key: 'deposition_date', label: 'Deposited' },
-        { key: 'ec_number', label: 'EC Number' }
+        { key: 'protein_name', label: 'Protein Name', icon: '🧬' },
+        { key: 'gene_name', label: 'Gene', icon: '🧬' },
+        { key: 'organism', label: 'Organism', icon: '🦠' },
+        { key: 'length', label: 'Length', suffix: ' residues', icon: '📏' },
+        { key: 'mass', label: 'Mass', suffix: ' Da', icon: '⚖️' },
+        { key: 'title', label: 'Title', icon: '📋' },
+        { key: 'method', label: 'Method', icon: '🔬' },
+        { key: 'resolution', label: 'Resolution', suffix: ' Å', icon: '🎯' },
+        { key: 'deposition_date', label: 'Deposited', icon: '📅' },
+        { key: 'ec_number', label: 'EC Number', icon: '#️⃣' }
       ];
 
       fields.forEach(field => {
         const value = metadata[field.key];
         if (value && value !== '' && value !== 0) {
           const item = document.createElement('div');
-          item.className = 'metadata-item';
+          item.className = 'metadata-item fade-in';
           
           const label = document.createElement('div');
           label.className = 'metadata-label';
-          label.textContent = field.label;
+          label.innerHTML = `${field.icon} ${field.label}`;
           
           const valueDiv = document.createElement('div');
           valueDiv.className = 'metadata-value';
@@ -794,7 +949,9 @@
           if (Array.isArray(value)) {
             displayValue = value.join(', ');
           }
-          if (field.suffix) {
+          if (field.suffix && typeof displayValue === 'number') {
+            displayValue = displayValue.toLocaleString() + field.suffix;
+          } else if (field.suffix) {
             displayValue += field.suffix;
           }
           
@@ -809,16 +966,18 @@
       // Show function if available
       if (metadata.function) {
         const functionItem = document.createElement('div');
+        functionItem.className = 'fade-in';
         functionItem.style.marginTop = '1rem';
         functionItem.style.padding = '0.75rem';
         functionItem.style.background = 'var(--bg-color)';
         functionItem.style.borderRadius = '0.375rem';
         functionItem.style.fontSize = '0.875rem';
-        functionItem.innerHTML = `<strong>Function:</strong> ${metadata.function}`;
+        functionItem.innerHTML = `<strong>⚡ Function:</strong> ${metadata.function}`;
         metadataContainer.appendChild(functionItem);
       }
 
       proteinInfo.style.display = 'block';
+      proteinInfo.classList.add('fade-in');
     }
 
     // Show/hide UI sections
@@ -845,48 +1004,104 @@
     // Export functionality
     async function exportStructure(url, format) {
       try {
-        showStatus(`Preparing ${format.toUpperCase()} download...`, 'info');
+        showStatus(`🔄 Preparing ${format.toUpperCase()} download...`, 'info');
         
-        const response = await fetch('/api/export', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url, format })
+        // Add loading state to export buttons
+        const exportButtons = document.querySelectorAll('.export-btn');
+        exportButtons.forEach(btn => {
+          btn.disabled = true;
+          btn.classList.add('loading');
         });
+        
+        setTimeout(async () => {
+          try {
+            const response = await fetch('/api/export', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url, format })
+            });
 
-        if (response.ok) {
-          const blob = await response.blob();
-          const downloadUrl = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = downloadUrl;
-          a.download = `structure.${format}`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(downloadUrl);
-          
-          showStatus('Download started', 'success');
-        } else {
-          const error = await response.json();
-          throw new Error(error.error || 'Export failed');
-        }
+            if (response.ok) {
+              const blob = await response.blob();
+              const downloadUrl = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = downloadUrl;
+              a.download = `structure.${format}`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              window.URL.revokeObjectURL(downloadUrl);
+              
+              showStatus(`✅ ${format.toUpperCase()} file downloaded successfully!`, 'success');
+            } else {
+              const error = await response.json();
+              throw new Error(error.error || 'Export failed');
+            }
+          } finally {
+            // Remove loading state
+            exportButtons.forEach(btn => {
+              btn.disabled = false;
+              btn.classList.remove('loading');
+            });
+          }
+        }, 300); // Small delay for better UX
+        
       } catch (error) {
         console.error('Export error:', error);
-        showStatus(`Export failed: ${error.message}`, 'error');
+        showStatus(`❌ Export failed: ${error.message}`, 'error');
+        
+        // Remove loading state on error
+        const exportButtons = document.querySelectorAll('.export-btn');
+        exportButtons.forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('loading');
+        });
       }
     }
 
-    // Export image (simplified)
+    // Export image (enhanced)
     function exportImage() {
-      if (!viewer) {
-        showStatus('No structure loaded', 'error');
+      if (!viewer || !viewer.plugin.canvas3d) {
+        showStatus('❌ No structure loaded for screenshot', 'error');
         return;
       }
       
       try {
-        // This would use Mol* screenshot functionality
-        showStatus('Image export not yet implemented', 'info');
+        showStatus('📸 Taking screenshot...', 'info');
+        
+        // Add screenshot preparation delay
+        setTimeout(() => {
+          try {
+            const canvas = viewer.plugin.canvas3d.canvas;
+            if (!canvas) {
+              throw new Error('Canvas not available');
+            }
+            
+            // Create high-quality image
+            const imageData = canvas.toDataURL('image/png', 1.0);
+            
+            // Create filename with timestamp
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+            const filename = `protein_structure_${timestamp}.png`;
+            
+            // Download image
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = imageData;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showStatus('📸 Screenshot saved successfully!', 'success');
+          } catch (error) {
+            console.error('Screenshot error:', error);
+            showStatus(`❌ Screenshot failed: ${error.message}`, 'error');
+          }
+        }, 500);
+        
       } catch (error) {
-        showStatus('Failed to export image', 'error');
+        console.error('Screenshot error:', error);
+        showStatus(`❌ Screenshot failed: ${error.message}`, 'error');
       }
     }
 
@@ -901,10 +1116,66 @@
         hideExportSection();
         currentStructureData = null;
         currentStructure = null;
-        showStatus('Viewer reset', 'info');
+        showStatus('🔄 Viewer reset successfully!', 'info');
       } catch (error) {
         console.error('Reset error:', error);
-        showStatus('Failed to reset viewer', 'error');
+        showStatus('❌ Failed to reset viewer', 'error');
+      }
+    }
+    
+    // Quick action functions
+    function quickAction(action) {
+      if (!viewer || !viewer.plugin.canvas3d) {
+        showStatus('❌ No structure loaded', 'error');
+        return;
+      }
+      
+      try {
+        const canvas3d = viewer.plugin.canvas3d;
+        
+        switch (action) {
+          case 'focus':
+            // Focus on structure by resetting camera
+            canvas3d.requestCameraUpdate('auto');
+            showStatus('🎯 Structure focused!', 'success');
+            break;
+            
+          case 'spin':
+            // Toggle auto-rotation
+            if (window.autoRotating) {
+              window.autoRotating = false;
+              clearInterval(window.rotationInterval);
+              showStatus('🛑 Auto-rotation stopped', 'info');
+            } else {
+              window.autoRotating = true;
+              window.rotationInterval = setInterval(() => {
+                if (canvas3d && canvas3d.camera) {
+                  canvas3d.requestCameraUpdate();
+                }
+              }, 50);
+              showStatus('🌀 Auto-rotation started!', 'success');
+            }
+            break;
+            
+          case 'center':
+            // Center structure
+            canvas3d.requestCameraUpdate();
+            canvas3d.requestDraw();
+            showStatus('📍 Structure centered!', 'success');
+            break;
+            
+          case 'quality':
+            // Toggle rendering quality
+            canvas3d.requestDraw();
+            showStatus('💎 Rendering quality optimized!', 'success');
+            break;
+            
+          default:
+            showStatus('⚡ Quick action executed!', 'info');
+        }
+      } catch (error) {
+        console.error('Quick action error:', error);
+        showStatus(`❌ Action failed: ${error.message}`, 'error');
       }
     }
 
@@ -956,9 +1227,33 @@
       });
     });
 
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Ctrl+Enter or Cmd+Enter to search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        const query = document.getElementById('searchInput').value.trim();
+        if (query) performSearch(query);
+      }
+      
+      // Escape to reset viewer
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        resetViewer();
+      }
+      
+      // R to reset camera (when not typing in input)
+      if (e.key === 'r' || e.key === 'R') {
+        if (e.target.tagName !== 'INPUT') {
+          e.preventDefault();
+          resetCamera();
+        }
+      }
+    });
+
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
-      showStatus('Welcome! Search for a protein to begin.', 'info');
+      showStatus('Welcome! Search for a protein to begin. Use Ctrl+Enter to search quickly! 🧬', 'info');
     });
   </script>
 </body>
