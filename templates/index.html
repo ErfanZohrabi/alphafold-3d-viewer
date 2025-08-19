@@ -1,11 +1,9 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>AlphaFold 3D Protein Viewer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Mol* (no module build is easiest to use) -->
-  <script src="https://cdn.jsdelivr.net/npm/molstar@latest/build/viewer/molstar.js"></script>
+  <title>AlphaFold 3D Protein Viewer</title>
   <style>
     :root { color-scheme: light dark; }
     body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
@@ -18,7 +16,7 @@
     #viewer { width: 100%; height: 560px; border-radius: 12px; overflow: hidden; border: 1px solid #ccc; margin-top: 16px; }
     .muted { color: #666; }
     .examples a { margin-right: 10px; cursor: pointer; text-decoration: underline; }
-    .pill { display:inline-block; padding:4px 8px; border:1px solid #8884; border-radius:999px; font-size:12px; margin-right:8px;}
+    .pill { display:inline-block; padding:4px 8px; border:1px solid #8884; border-radius:999px; font-size:12px; margin-right:8px; }
   </style>
 </head>
 <body>
@@ -27,31 +25,29 @@
     <span class="pill">Mol*</span>
     <span class="pill">Flask</span>
   </header>
-
-  <main class="wrap">
-    <section>
-      <h2>Explore protein structures</h2>
-      <p class="muted">Search by <strong>UniProt ID</strong> (e.g. <code>P05067</code>) or protein name (e.g. “insulin”).</p>
-      <div class="row">
-        <input id="q" type="text" placeholder="e.g. P05067 or insulin" />
-        <button id="go">Search</button>
-        <button id="reset" title="Clear viewer">Reset</button>
-      </div>
-      <p class="examples muted">Try:
-        <a data-example="P05067">P05067</a>
-        <a data-example="TP53">TP53</a>
-        <a data-example="insulin">insulin</a>
-        <a data-example="hemoglobin">hemoglobin</a>
-        <a data-example="P38398">P38398</a>
-      </p>
-      <div id="status" class="muted"></div>
-      <div id="viewer"></div>
-      <p class="muted" style="margin-top:8px">Powered by <a href="https://alphafold.ebi.ac.uk" target="_blank" rel="noreferrer">AlphaFold DB</a> and <a href="https://molstar.org" target="_blank" rel="noreferrer">Mol*</a>.</p>
-    </section>
-  </main>
-
+  <div class="wrap">
+    <h2>Explore protein structures</h2>
+    <p>Search by UniProt ID (e.g. <code>P05067</code>) or protein name (e.g. “insulin”).</p>
+    <div class="row">
+      <input id="q" type="text" placeholder="Enter protein name or UniProt ID…" />
+      <button id="go">Search</button>
+      <button id="reset">Reset</button>
+    </div>
+    <p class="examples">Try:
+      <a data-example="P05067">P05067</a>
+      <a data-example="TP53">TP53</a>
+      <a data-example="insulin">insulin</a>
+      <a data-example="hemoglobin">hemoglobin</a>
+      <a data-example="P38398">P38398</a>
+    </p>
+    <div id="status" class="muted"></div>
+    <div id="viewer"></div>
+    <p class="muted">Powered by AlphaFold DB and Mol*.</p>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/molstar@3/build/viewer/molstar.js"></script>
   <script>
-    // Viewer boot
+    // Boot the Mol* viewer lazily. This avoids creating the viewer until
+    // needed and prevents multiple instances from being created.
     let viewer = null;
     function makeViewer() {
       if (viewer) return viewer;
@@ -65,13 +61,19 @@
       return viewer;
     }
 
+    // Load a PDB from the proxied URL and update the status text.
     async function loadAccession(acc, pdbUrl) {
       const v = makeViewer();
       document.getElementById('status').textContent = `Loading ${acc}…`;
       try {
-        await v.clear();
-        // load via our proxy to avoid CORS
-        const proxied = `/proxy?url=${encodeURIComponent(pdbUrl)}`;
+        if (v.plugin && typeof v.plugin.clear === 'function') {
+          await v.plugin.clear();
+        } else if (typeof v.clear === 'function') {
+          await v.clear();
+        }
+        // Build the proxied URL using Flask's url_for to respect prefixes.
+        const proxyBase = {{ url_for('proxy', _external=false) | tojson }};
+        const proxied = `${proxyBase}?url=${encodeURIComponent(pdbUrl)}`;
         await v.loadStructureFromUrl(proxied, 'pdb');
         document.getElementById('status').textContent = `Loaded ${acc}`;
       } catch (e) {
@@ -79,14 +81,22 @@
       }
     }
 
+    // Perform the search by calling the Flask backend.
     async function doSearch(query) {
       document.getElementById('status').textContent = 'Resolving…';
-      const res = await fetch('/search', {
+      const searchUrl = {{ url_for('search', _external=false) | tojson }};
+      const res = await fetch(searchUrl, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ query })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query }),
       });
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        document.getElementById('status').textContent = 'Search failed: invalid response';
+        return;
+      }
       if (!res.ok) {
         document.getElementById('status').textContent = data.error || 'Search failed';
         return;
@@ -101,7 +111,11 @@
     });
     document.getElementById('reset').addEventListener('click', async () => {
       if (!viewer) return;
-      await viewer.clear();
+      if (viewer.plugin && typeof viewer.plugin.clear === 'function') {
+        await viewer.plugin.clear();
+      } else if (typeof viewer.clear === 'function') {
+        await viewer.clear();
+      }
       document.getElementById('status').textContent = 'Viewer cleared';
     });
     document.querySelectorAll('[data-example]').forEach(a =>
