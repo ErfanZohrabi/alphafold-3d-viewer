@@ -209,6 +209,21 @@
       overflow: hidden;
       border: 1px solid var(--border-color);
       background: var(--surface-color);
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+      position: relative;
+    }
+    
+    #viewer:active {
+      cursor: grabbing;
+    }
+    
+    #viewer canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+      touch-action: none;
     }
     
     .status {
@@ -435,7 +450,18 @@
             </select>
           </div>
         </div>
-        <button id="applyVisualization" class="btn btn-primary" style="width: 100%;">Apply Changes</button>
+        <button id="applyVisualization" class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;">Apply Changes</button>
+        <button id="resetCamera" class="btn btn-secondary" style="width: 100%;">🎯 Reset Camera</button>
+        
+        <div style="margin-top: 1rem; padding: 0.75rem; background: var(--bg-color); border-radius: 0.375rem; font-size: 0.875rem;">
+          <strong style="color: var(--text-color);">🖱️ Mouse Controls:</strong>
+          <div style="margin-top: 0.5rem; color: var(--text-muted); line-height: 1.4;">
+            • <strong>Left click + drag:</strong> Rotate<br>
+            • <strong>Right click + drag:</strong> Pan<br>
+            • <strong>Scroll wheel:</strong> Zoom in/out<br>
+            • <strong>Double click:</strong> Reset view
+          </div>
+        </div>
       </div>
 
       <div id="proteinInfo" class="card" style="display: none;">
@@ -471,12 +497,49 @@
       try {
         viewer = await molstar.Viewer.create('viewer', {
           layoutIsExpanded: false,
-          layoutShowControls: true,
+          layoutShowControls: false,
           layoutShowRemoteState: false,
-          viewportShowExpand: true,
+          layoutShowSequence: false,
+          layoutShowLog: false,
+          layoutShowLeftPanel: false,
+          layoutShowRightPanel: false,
+          viewportShowExpand: false,
+          viewportShowSelectionMode: false,
+          viewportShowAnimation: false,
           collapseLeftPanel: true,
-          collapseRightPanel: false,
+          collapseRightPanel: true,
+          pdbProvider: 'rcsb',
+          emdbProvider: 'rcsb',
+          volumeStreamingDisabled: true,
+          extensions: [],
+          canvas3d: {
+            camera: {
+              helper: {
+                axes: {
+                  name: 'off',
+                  params: {}
+                }
+              }
+            },
+            renderer: {
+              backgroundColor: 'white'
+            }
+          }
         });
+        
+        // Ensure mouse controls are enabled for rotation
+        if (viewer && viewer.plugin && viewer.plugin.canvas3d) {
+          const canvas3d = viewer.plugin.canvas3d;
+          if (canvas3d.input) {
+            // Enable all mouse interactions
+            canvas3d.input.move.subscribe(({ current, buttons, modifiers }) => {
+              if (buttons === 1) { // Left mouse button for rotation
+                canvas3d.requestCameraUpdate();
+              }
+            });
+          }
+        }
+        
         return viewer;
       } catch (error) {
         console.error('Failed to initialize viewer:', error);
@@ -607,7 +670,33 @@
         // Load structure
         currentStructure = await v.loadStructureFromUrl(proxyUrl, 'pdb');
         
-        showStatus(`Successfully loaded ${source.type} structure`, 'success');
+        // Ensure proper camera setup and controls
+        if (v.plugin.canvas3d) {
+          // Reset camera to fit structure
+          v.plugin.canvas3d.requestCameraUpdate('auto');
+          
+          // Enable mouse controls explicitly
+          const canvas3d = v.plugin.canvas3d;
+          if (canvas3d.input) {
+            canvas3d.input.move.subscribe(({ current, buttons, modifiers }) => {
+              if (buttons === 1) { // Left mouse button for rotation
+                canvas3d.requestCameraUpdate();
+              } else if (buttons === 4) { // Middle mouse button for zoom
+                canvas3d.requestCameraUpdate();
+              } else if (buttons === 2) { // Right mouse button for pan
+                canvas3d.requestCameraUpdate();
+              }
+            });
+          }
+          
+          // Ensure the canvas is properly sized and interactive
+          setTimeout(() => {
+            canvas3d.requestDraw();
+            canvas3d.animate();
+          }, 100);
+        }
+        
+        showStatus(`Successfully loaded ${source.type} structure - Use mouse to rotate, zoom, and pan`, 'success');
         showExportSection(source);
         
         // Apply default visualization
@@ -797,6 +886,27 @@
       }
     }
 
+    // Reset camera to fit structure
+    async function resetCamera() {
+      if (!viewer || !currentStructure) {
+        showStatus('No structure loaded to reset camera', 'error');
+        return;
+      }
+      
+      try {
+        const canvas3d = viewer.plugin.canvas3d;
+        if (canvas3d) {
+          // Reset camera to auto-fit the structure
+          canvas3d.requestCameraUpdate('auto');
+          canvas3d.requestDraw();
+          showStatus('Camera reset to fit structure', 'success');
+        }
+      } catch (error) {
+        console.error('Camera reset error:', error);
+        showStatus('Failed to reset camera', 'error');
+      }
+    }
+
     // Event listeners
     document.getElementById('searchBtn').addEventListener('click', () => {
       const query = document.getElementById('searchInput').value.trim();
@@ -811,6 +921,7 @@
     });
 
     document.getElementById('resetBtn').addEventListener('click', resetViewer);
+    document.getElementById('resetCamera').addEventListener('click', resetCamera);
     document.getElementById('applyVisualization').addEventListener('click', applyVisualization);
     document.getElementById('exportImage').addEventListener('click', exportImage);
 
